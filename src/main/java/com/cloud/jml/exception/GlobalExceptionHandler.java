@@ -13,13 +13,13 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProveedorDuplicadoException.class)
-    public ResponseEntity<Map<String, Object>> handleClienteDuplicado(ProveedorDuplicadoException ex) {
-        return buildErrorResponse(HttpStatus.CONFLICT, "Cliente duplicado", ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleProveedorDuplicado(ProveedorDuplicadoException ex) {
+        return buildErrorResponse(HttpStatus.CONFLICT, "Proveedor duplicado", ex.getMessage());
     }
 
     @ExceptionHandler(ProveedorNoEncontradoException.class)
-    public ResponseEntity<Map<String, Object>> handleClienteNoEncontrado(ProveedorNoEncontradoException ex) {
-        return buildErrorResponse(HttpStatus.NOT_FOUND, "Cliente no encontrado", ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleProveedorNoEncontrado(ProveedorNoEncontradoException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Proveedor no encontrado", ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

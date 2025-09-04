@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProveedorRepository extends JpaRepository<ProveedorEntity, Long> {
-    Optional<ProveedorEntity> findByNic(String nic);
+    Optional<ProveedorEntity> findByNic(Long nic);
 
     List<ProveedorEntity> findByNombre(String nombre);
 }

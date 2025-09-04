@@ -1,7 +1,6 @@
 package com.cloud.jml.controller;
 
 import com.cloud.jml.dto.ProveedorDTO;
-import com.cloud.jml.model.ProveedorEntity;
 import com.cloud.jml.service.ProveedorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,25 +22,27 @@ public class ProveedorController {
         this.proveedorService = proveedorService;
     }
 
+    // Crear Proveedor
     @PostMapping("/register")
     public ResponseEntity<ProveedorDTO> crearProveedor(@RequestBody ProveedorDTO proveedorDTO) {
-        log.info("📌 Iniciando petición para crear cliente: {}", proveedorDTO.getNombre());
+        log.info("📌 Iniciando petición para crear Proveedor: {}", proveedorDTO.getNombre());
 
         ProveedorDTO response = proveedorService.crearProveedor(proveedorDTO);
 
-        log.info("📌 Finaliza petición para crear cliente: {}", proveedorDTO.getNombre());
+        log.info("📌 Finaliza petición para crear Proveedor: {}", proveedorDTO.getNombre());
 
         return ResponseEntity.ok(response);
     }
 
+    // Buscar Proveedor por NIC
     @GetMapping("/nic")
-    public ResponseEntity<ProveedorEntity> obtenerProveedorPorNic(@RequestParam("nic") String nic) {
+    public ResponseEntity<ProveedorDTO> obtenerProveedorPorNic(@RequestParam("nic") Long nic) {
         log.info("📌 Iniciando petición para buscar Proveedor por NIC: {}", nic);
 
         ProveedorDTO proveedorDTO = new ProveedorDTO();
         proveedorDTO.setNic(nic);
 
-        Optional<ProveedorEntity> response = proveedorService.obtenerProveedorPorNic(proveedorDTO);
+        Optional<ProveedorDTO> response = proveedorService.obtenerProveedorPorNic(proveedorDTO);
 
         log.info("📌 Finaliza petición de buscar Proveedor por NIC: {}", nic);
 
@@ -49,14 +50,15 @@ public class ProveedorController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    // Buscar Proveedor por nombre
     @GetMapping("/nombre")
-    public ResponseEntity<List<ProveedorEntity>> obtenerProveedorPorNombre(@RequestParam("nombre") String nombre) {
+    public ResponseEntity<List<ProveedorDTO>> obtenerProveedorPorNombre(@RequestParam("nombre") String nombre) {
         log.info("📌 Iniciando petición para buscar Proveedor por nombre: {}", nombre);
 
         ProveedorDTO proveedorDTO = new ProveedorDTO();
         proveedorDTO.setNombre(nombre);
 
-        List<ProveedorEntity> response = proveedorService.obtenerProveedorPorNombre(proveedorDTO);
+        List<ProveedorDTO> response = proveedorService.obtenerProveedorPorNombre(proveedorDTO);
 
         log.info("📌 Finaliza petición de buscar Proveedor por nombre: {}", nombre);
 
@@ -65,35 +67,37 @@ public class ProveedorController {
                 : ResponseEntity.ok(response);
     }
 
+    // Listar todos los Proveedores
     @GetMapping("/listar-proveedores")
-    public ResponseEntity<List<ProveedorEntity>> listarProveedores() {
+    public ResponseEntity<List<ProveedorDTO>> listarProveedores() {
         log.info("📌 Iniciando petición para listar todos los Proveedores");
 
-        List<ProveedorEntity> proveedores = proveedorService.listarProveedores();
+        List<ProveedorDTO> proveedores = proveedorService.listarProveedores();
 
         log.info("📌 Finaliza petición para listar todos los Proveedores");
 
         return ResponseEntity.ok(proveedores);
     }
 
+    // Actualizar Proveedor
     @PutMapping("/actualizar")
     public ResponseEntity<ProveedorDTO> actualizarProveedor(@RequestBody ProveedorDTO proveedorDTO) {
         log.info("📌 Iniciando petición para actualizar Proveedor con NIC: {}", proveedorDTO.getNic());
 
-        ProveedorDTO response = proveedorService.actualizarProveedor(proveedorDTO);
-
-        if (response == null) {
+        try {
+            ProveedorDTO response = proveedorService.actualizarProveedor(proveedorDTO);
+            log.info("📌 Finaliza petición de actualización de Proveedor con NIC: {}", proveedorDTO.getNic());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
             log.warn("⚠️ No se pudo actualizar el Proveedor. NIC no encontrado: {}", proveedorDTO.getNic());
             return ResponseEntity.notFound().build();
         }
-
-        log.info("📌 Finaliza petición de actualización de Proveedor con NIC: {}", proveedorDTO.getNic());
-        return ResponseEntity.ok(response);
     }
 
+    // Eliminar Proveedor por NIC
     @DeleteMapping("/eliminar-nic")
-    public ResponseEntity<Void> eliminarCliente(@RequestParam("nic") String nic) {
-        log.info("📌 Iniciando petición para eliminar Proveedor con nic: {}", nic);
+    public ResponseEntity<Void> eliminarProveedor(@RequestParam("nic") Long nic) {
+        log.info("📌 Iniciando petición para eliminar Proveedor con NIC: {}", nic);
 
         ProveedorDTO proveedorDTO = new ProveedorDTO();
         proveedorDTO.setNic(nic);

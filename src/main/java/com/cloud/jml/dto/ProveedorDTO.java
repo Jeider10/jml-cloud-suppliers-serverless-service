@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class ProveedorDTO {
 
-    private String nic;
+    private Long nic;
     private String nombre;
     private String telefono;
     private String direccion;
@@ -16,7 +16,7 @@ public class ProveedorDTO {
         // Constructor
     }
 
-    public ProveedorDTO(String nic, String nombre, String telefono, String direccion, String correo, LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
+    public ProveedorDTO(Long nic, String nombre, String telefono, String direccion, String correo, LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
         this.nic = nic;
         this.nombre = nombre;
         this.telefono = telefono;
@@ -27,11 +27,11 @@ public class ProveedorDTO {
     }
 
     // Getters y Setters
-    public String getNic() {
+    public Long getNic() {
         return nic;
     }
 
-    public void setNic(String nic) {
+    public void setNic(Long nic) {
         this.nic = nic;
     }
 

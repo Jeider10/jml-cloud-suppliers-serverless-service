@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,7 +30,7 @@ public class ProveedorService {
         log.info("📌 Inicio de creación de Proveedor: {}", proveedorDTO.getNombre());
 
         // Verificar si ya existe por identificación
-        Optional<ProveedorEntity> existente = obtenerProveedorPorNic(proveedorDTO);
+        Optional<ProveedorDTO> existente = obtenerProveedorPorNic(proveedorDTO);
         if (existente.isPresent()) {
             log.warn("⚠️ Proveedor duplicado: {}", proveedorDTO.getNic());
             throw new ProveedorDuplicadoException(proveedorDTO.getNic());
@@ -37,90 +38,63 @@ public class ProveedorService {
 
         // Mapeo de DTO a Entity
         ProveedorEntity proveedorEntity = mapDtoToEntity(proveedorDTO);
-        log.debug("🔹 Proveedor mapeado a Entity: {}", proveedorEntity);
 
         // Guardamos en la base de datos
         ProveedorEntity guardado = proveedorRepository.save(proveedorEntity);
         log.info("✅ Proveedor guardado con ID: {}", guardado.getId());
 
-        // Convertimos de nuevo a DTO
-        ProveedorDTO response = mapEntityToDto(guardado);
-        log.debug("🔹 Proveedor convertido nuevamente a DTO: {}", response);
-
-        log.info("📌 Finalizó creación de Proveedor: {}", response.getNombre());
-
-        return response;
+        return mapEntityToDto(guardado);
     }
 
     @Transactional
-    public Optional<ProveedorEntity> obtenerProveedorPorNic(ProveedorDTO proveedorDTO) {
+    public Optional<ProveedorDTO> obtenerProveedorPorNic(ProveedorDTO proveedorDTO) {
         log.info("📌 Inicio de búsqueda de Proveedor por NIC: {}", proveedorDTO.getNic());
 
-        Optional<ProveedorEntity> byNic = proveedorRepository.findByNic(proveedorDTO.getNic());
-
-        if (byNic.isPresent()) {
-            log.info("✅ Proveedor encontrado con NIC: {}", byNic.get().getNic());
-        } else {
-            log.warn("⚠️ No se encontró Proveedor con NIC: {}", proveedorDTO.getNic());
-        }
+        Optional<ProveedorDTO> optionalProveedorDTO = proveedorRepository.findByNic(proveedorDTO.getNic())
+                .map(this::mapEntityToDto);
 
         log.info("📌 Finaliza búsqueda de Proveedor por NIC: {}", proveedorDTO.getNic());
-
-        return byNic;
+        return optionalProveedorDTO;
     }
 
     @Transactional
-    public List<ProveedorEntity> obtenerProveedorPorNombre(ProveedorDTO proveedorDTO) {
+    public List<ProveedorDTO> obtenerProveedorPorNombre(ProveedorDTO proveedorDTO) {
         log.info("📌 Inicio de búsqueda de Proveedor por nombre: {}", proveedorDTO.getNombre());
 
         List<ProveedorEntity> proveedores = proveedorRepository.findByNombre(proveedorDTO.getNombre());
 
-        if (proveedores.isEmpty()) {
-            log.warn("⚠️ No se encontró Proveedor con nombre: {}", proveedorDTO.getNombre());
-        } else {
-            log.info("✅ Se encontraron {} Proveedor(s) con el nombre: {}", proveedores.size(), proveedorDTO.getNombre());
-        }
+        List<ProveedorDTO> proveedorName = proveedores.stream()
+                .map(this::mapEntityToDto)
+                .collect(Collectors.toList());
 
-        log.info("📌 Finaliza búsqueda de cliente por nombre: {}", proveedorDTO.getNombre());
-
-        return proveedores;
+        log.info("📌 Finaliza búsqueda de Proveedor por nombre: {}", proveedorDTO.getNombre());
+        return proveedorName;
     }
 
     @Transactional
-    public List<ProveedorEntity> listarProveedores() {
+    public List<ProveedorDTO> listarProveedores() {
         log.info("📌 Inicio de búsqueda de todos los Proveedores");
 
-        List<ProveedorEntity> allProveedor = proveedorRepository.findAll();
+        List<ProveedorDTO> proveedores = proveedorRepository.findAll().stream()
+                .map(this::mapEntityToDto)
+                .collect(Collectors.toList());
 
-        log.info("✅ Se encontraron {} Proveedores", allProveedor.size());
-
-        return allProveedor;
+        log.info("📌 Finaliza búsqueda de todos los Proveedores");
+        return proveedores;
     }
 
     @Transactional
     public ProveedorDTO actualizarProveedor(ProveedorDTO proveedorDTO) {
         log.info("📌 Inicio de actualización de Proveedor: {} con NIC: {}", proveedorDTO.getNombre(), proveedorDTO.getNic());
 
-        Optional<ProveedorEntity> proveedorOpt = obtenerProveedorPorNic(proveedorDTO);
-
-        if (proveedorOpt.isEmpty()) {
-            log.warn("⚠️ No se encontró Proveedor con NIC: {}", proveedorDTO.getNic());
-            throw new ProveedorNoEncontradoException(proveedorDTO.getNic());
-        }
-
-        // Verificar si ya existe por NIC
-        ProveedorEntity proveedorEntity = proveedorOpt.get();
+        ProveedorEntity proveedorEntity = validarExistenciaProveedor(proveedorDTO);
 
         actualizarDatosProveedor(proveedorDTO, proveedorEntity);
 
         ProveedorEntity actualizado = proveedorRepository.save(proveedorEntity);
         log.info("✅ Proveedor actualizado con NIC: {}", actualizado.getNic());
 
-        ProveedorDTO response = mapEntityToDto(actualizado);
-        log.debug("🔹 Proveedor actualizado convertido a DTO: {}", response);
-        log.info("📌 Finalizó actualización de Proveedor: {} con NIC: {}", response.getNombre(), response.getNic());
-
-        return response;
+        return mapEntityToDto(actualizado);
     }
 
     @Transactional
@@ -132,10 +106,11 @@ public class ProveedorService {
 
         proveedorRepository.delete(proveedorEntity);
 
-        log.info("✅ Cliente eliminado con identificacion: {}", proveedorDTO.getNic());
+        log.info("✅ Proveedor eliminado con NIC: {}", proveedorDTO.getNic());
     }
 
-    @Transactional
+    // ------------------ 🔹 Métodos privados de Mapeos ------------------
+
     private ProveedorEntity mapDtoToEntity(ProveedorDTO proveedorDTO) {
         log.info("📌 Iniciando mapeo DTO a Entity para crear cliente");
 
@@ -183,14 +158,10 @@ public class ProveedorService {
     }
 
     private ProveedorEntity validarExistenciaProveedor(ProveedorDTO proveedorDTO) {
-        Optional<ProveedorEntity> proveedorOpt = obtenerProveedorPorNic(proveedorDTO);
+        ProveedorEntity proveedorEntity = proveedorRepository.findByNic(proveedorDTO.getNic())
+                .orElseThrow(() -> new ProveedorNoEncontradoException(proveedorDTO.getNic()));
 
-        if (proveedorOpt.isPresent()) {
-            log.info("✅ Proveedor: {} encontrado con NIC: {}", proveedorDTO.getNombre(), proveedorDTO.getNic());
-            return proveedorOpt.get();
-        } else {
-            log.warn("⚠️ No se encontró Proveedor: {} con NIC: {}", proveedorDTO.getNombre(), proveedorDTO.getNic());
-            throw new ProveedorNoEncontradoException(proveedorDTO.getNic());
-        }
+        log.info("📌 Proveedor encontrado con NIC: {}", proveedorDTO.getNic());
+        return proveedorEntity;
     }
 }
