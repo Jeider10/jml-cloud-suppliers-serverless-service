@@ -12,7 +12,7 @@ public class ProveedorEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "codigo_sucursal", nullable = false)
     private Long codigoSucursal;
 
     @Column(nullable = false)

@@ -50,8 +50,8 @@ public class ProveedorController {
     }
 
     // Buscar Proveedor por Código de Sucursal
-    @GetMapping("/codigo-sucursal")
-    public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigo-sucursal") Long codigoSucursal) {
+    @GetMapping("/codigoSucursal")
+    public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigoSucursal") Long codigoSucursal) {
         log.info("📌 Iniciando petición para buscar Proveedor por Código de Sucursal: {}", codigoSucursal);
 
         Optional<ProveedorResponseDTO> response = proveedorService.obtenerProveedorPorCodigoSucursal(codigoSucursal);
@@ -110,8 +110,8 @@ public class ProveedorController {
         }
     }
 
-    // Eliminar Proveedor por NIC
-    @DeleteMapping("/eliminar-codigo-sucursal")
+    // Eliminar Proveedor por Código de Sucursal
+    @DeleteMapping("/eliminar")
     public ResponseEntity<Void> eliminarProveedor(@RequestParam("codigoSucursal") Long codigoSucursal) {
         log.info("📌 Iniciando petición para eliminar Proveedor con Codigo de Sucursal: {}", codigoSucursal);
 
