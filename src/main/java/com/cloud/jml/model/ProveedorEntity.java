@@ -13,7 +13,7 @@ public class ProveedorEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Long nic;
+    private Long codigoSucursal;
 
     @Column(nullable = false)
     private String nombre;
@@ -37,12 +37,12 @@ public class ProveedorEntity {
         this.id = id;
     }
 
-    public Long getNic() {
-        return nic;
+    public Long getCodigoSucursal() {
+        return codigoSucursal;
     }
 
-    public void setNic(Long nic) {
-        this.nic = nic;
+    public void setCodigoSucursal(Long codigoSucursal) {
+        this.codigoSucursal = codigoSucursal;
     }
 
     public String getNombre() {
