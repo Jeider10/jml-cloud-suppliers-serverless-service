@@ -96,7 +96,7 @@ public class ProveedorService {
         log.info("📌 Inicio de búsqueda de Proveedor por nombre: {}", proveedorRequestDTO.getNombre());
 
         // Paso 1: Buscar entidades por nombre
-        List<ProveedorEntity> proveedoresEntity = proveedorRepository.findByNombre(proveedorRequestDTO.getNombre());
+        List<ProveedorEntity> proveedoresEntity = proveedorRepository.findByNombreContainingIgnoreCase(proveedorRequestDTO.getNombre());
 
         // Paso 2: Validar si está vacío
         if (proveedoresEntity.isEmpty()) {
