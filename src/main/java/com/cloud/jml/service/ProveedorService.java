@@ -57,6 +57,7 @@ public class ProveedorService {
 
     @Transactional(readOnly = true)
     public List<ProveedorResponseDTO> listarProveedores() {
+        log.info("📌 Inicio de búsqueda de todos los Proveedores");
 
         // Paso 1: Obtener entidades desde la BD
         List<ProveedorEntity> proveedoresEntity = proveedorRepository.findAll();
@@ -71,6 +72,7 @@ public class ProveedorService {
         List<ProveedorResponseDTO> proveedoresResponse = streamDto.toList();
 
         log.info("📌 Finaliza búsqueda de todos los Proveedores. Total encontrados: {}", proveedoresResponse.size());
+
         return proveedoresResponse;
     }
 

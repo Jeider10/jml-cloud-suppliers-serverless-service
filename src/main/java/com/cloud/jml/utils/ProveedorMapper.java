@@ -12,8 +12,10 @@ import java.time.LocalDateTime;
 @Component // 🔹 Anotación para indicar que es un componente de Spring
 public class ProveedorMapper {
 
-    public ProveedorMapper() {
-        // Constructor
+    private final ProveedorUtils proveedorUtils;
+
+    public ProveedorMapper(ProveedorUtils proveedorUtils) {
+        this.proveedorUtils = proveedorUtils;
     }
 
     // ------------------ 🔹 Métodos de Mapeos ------------------
@@ -45,8 +47,9 @@ public class ProveedorMapper {
         proveedorResponseDTO.setTelefono(proveedorEntity.getTelefono());
         proveedorResponseDTO.setDireccion(proveedorEntity.getDireccion());
         proveedorResponseDTO.setCorreo(proveedorEntity.getCorreo());
-        proveedorResponseDTO.setFechaCreacion(proveedorEntity.getFechaCreacion());
-        proveedorResponseDTO.setFechaActualizacion(proveedorEntity.getFechaActualizacion());
+
+        // 🔹 Formatear fechas
+        proveedorUtils.asignarFechasFormateadas(proveedorEntity, proveedorResponseDTO);
 
         log.info("📌 Finalizando mapeo Entity a DTO para crear Proveedor");
 

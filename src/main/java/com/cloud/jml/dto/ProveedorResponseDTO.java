@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Setter
 @Getter
 @NoArgsConstructor // Constructor sin argumentos
@@ -19,6 +17,6 @@ public class ProveedorResponseDTO {
     private String telefono;
     private String direccion;
     private String correo;
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaActualizacion;
+    private String fechaCreacion;
+    private String fechaActualizacion;
 }

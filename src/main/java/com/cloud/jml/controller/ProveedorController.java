@@ -25,7 +25,6 @@ public class ProveedorController {
         log.info("🔥 ProveedorController inicializado correctamente.");
     }
 
-    // Crear Proveedor
     @PostMapping("/register")
     public ResponseEntity<ProveedorResponseDTO> crearProveedor(@RequestBody ProveedorRequestDTO proveedorRequestDTO) {
         log.info("📌 Iniciando petición para crear Proveedor: {}", proveedorRequestDTO.getNombre());
@@ -37,7 +36,6 @@ public class ProveedorController {
         return ResponseEntity.ok(response);
     }
 
-    // Listar todos los Proveedores
     @GetMapping("/listar-proveedores")
     public ResponseEntity<List<ProveedorResponseDTO>> listarProveedores() {
         log.info("📌 Iniciando petición para listar todos los Proveedores");
@@ -49,7 +47,6 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedores);
     }
 
-    // Buscar Proveedor por Código de Sucursal
     @GetMapping("/codigoSucursal")
     public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigoSucursal") Long codigoSucursal) {
         log.info("📌 Iniciando petición para buscar Proveedor por Código de Sucursal: {}", codigoSucursal);
@@ -70,7 +67,6 @@ public class ProveedorController {
         return proveedorResponse;
     }
 
-    // Buscar Proveedor por nombre
     @GetMapping("/nombre")
     public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorNombre(@RequestParam("nombre") String nombre) {
         log.info("📌 Iniciando petición para buscar Proveedor por nombre: {}", nombre);
@@ -93,7 +89,6 @@ public class ProveedorController {
         return proveedorResponse;
     }
 
-    // Actualizar Proveedor
     @PutMapping("/actualizar")
     public ResponseEntity<ProveedorResponseDTO> actualizarProveedor(@RequestBody ProveedorRequestDTO proveedorRequestDTO) {
         log.info("📌 Iniciando petición para actualizar Proveedor con Codigo de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
@@ -110,7 +105,6 @@ public class ProveedorController {
         }
     }
 
-    // Eliminar Proveedor por Código de Sucursal
     @DeleteMapping("/eliminar")
     public ResponseEntity<Void> eliminarProveedor(@RequestParam("codigoSucursal") Long codigoSucursal) {
         log.info("📌 Iniciando petición para eliminar Proveedor con Codigo de Sucursal: {}", codigoSucursal);
@@ -121,10 +115,10 @@ public class ProveedorController {
         try {
             proveedorService.eliminarProveedor(proveedorRequestDTO);
             log.info("📌 Finalizó petición de eliminación de Proveedor con Codigo de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
-            return ResponseEntity.noContent().build(); // 204 No Content
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             log.warn("⚠️ Error al eliminar Proveedor: {}", e.getMessage());
-            return ResponseEntity.notFound().build(); // 404 Not Found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 }
