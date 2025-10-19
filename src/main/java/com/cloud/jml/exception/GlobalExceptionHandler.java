@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleProveedorErrors(ProveedorRuntimeException ex) {
         return buildErrorResponse(
                 ex.getStatus(),
-                "👤 [CLIENTE] Error en cliente",
+                "👤 [PROVEEDOR] Error en proveedor",
                 ex.getMessage()
         );
     }

@@ -22,77 +22,77 @@ public class ProveedorController {
         log.info("🔥 ProveedorController inicializado correctamente.");
     }
 
-    @GetMapping("/listar-proveedores")
+    @GetMapping("/list/all")
     public ResponseEntity<List<ProveedorResponseDTO>> listarProveedores() {
-        log.info("📌 Iniciando petición para listar todos los Proveedores");
+        log.info("📥 [SOLICITUD] Listar todos los proveedores");
 
         List<ProveedorResponseDTO> proveedores = proveedorService.listarProveedores();
 
-        log.info("📌 Finaliza petición para listar todos los Proveedores");
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores", proveedores.size());
 
         return ResponseEntity.ok(proveedores);
     }
 
     @PostMapping("/register")
     public ResponseEntity<ProveedorResponseDTO> crearProveedor(@RequestBody ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("📝 [PETICIÓN] Crear Proveedor: {}", proveedorRequestDTO.getNombre());
+        log.info("📥 [SOLICITUD] Crear Proveedor: {}", proveedorRequestDTO.getNombre());
 
         ProveedorResponseDTO response = proveedorService.crearProveedor(proveedorRequestDTO);
 
-        log.info("📤 [RESPUESTA] Proveedor creado con nombre: {}", proveedorRequestDTO.getNombre());
+        log.info("📤 [RESPUESTA] Proveedor creado: {} con código de sucursal: {}", response.getNombre(), response.getCodigoSucursal());
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/codigoSucursal")
     public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigoSucursal") Long codigoSucursal) {
-        log.info("📌 Iniciando petición para buscar Proveedor por Código de Sucursal: {}", codigoSucursal);
+        log.info("📥 [SOLICITUD] Buscar proveedor por código de sucursal: {}", codigoSucursal);
 
         ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();
         proveedorRequestDTO.setCodigoSucursal(codigoSucursal);
 
         ProveedorResponseDTO proveedor = proveedorService.obtenerProveedorPorCodigoSucursal(proveedorRequestDTO);
 
-        log.info("✅ [RESPUESTA] Proveedor encontrado por Código de Sucursal: {}", codigoSucursal);
+        log.info("📤 [RESPUESTA] Proveedor encontrado con código de sucursal: {}", proveedor.getCodigoSucursal());
 
         return ResponseEntity.ok(proveedor);
     }
 
     @GetMapping("/nombre")
     public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorNombre(@RequestParam("nombre") String nombre) {
-        log.info("🔍 [SOLICITUD] Buscar Proveedor por nombre: {}", nombre);
+        log.info("📥 [SOLICITUD] Buscar proveedor por nombre: {}", nombre);
 
         ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();
         proveedorRequestDTO.setNombre(nombre);
 
         List<ProveedorResponseDTO> proveedor = proveedorService.obtenerProveedorPorNombre(proveedorRequestDTO);
 
-        log.info("✅ [RESPUESTA] Proveedor encontrado por nombre: {}", nombre);
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores con nombre: {}", proveedor.size(), proveedorRequestDTO.getNombre());
 
         return ResponseEntity.ok(proveedor);
     }
 
-    @PutMapping("/actualizar")
+    @PutMapping("/update")
     public ResponseEntity<ProveedorResponseDTO> actualizarProveedor(@RequestBody ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("📝 [PETICIÓN] Actualizar proveedor con Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+        log.info("📥 [SOLICITUD] Actualizar proveedor con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
 
         ProveedorResponseDTO proveedorResponseDTO = proveedorService.actualizarProveedor(proveedorRequestDTO);
 
-        log.info("✅ [RESPUESTA] Proveedor actualizado correctamente: {} con Código de Sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
+        log.info("📤 [RESPUESTA] Proveedor actualizado correctamente: {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
 
         return ResponseEntity.ok(proveedorResponseDTO);
     }
 
-    @DeleteMapping("/eliminar")
+    @DeleteMapping("/delete")
     public ResponseEntity<Void> eliminarProveedor(@RequestParam("codigoSucursal") Long codigoSucursal) {
-        log.info("🗑️ [PETICIÓN] Eliminar proveedor con Código de Sucursal: {}", codigoSucursal);
+        log.info("📥 [SOLICITUD] Eliminar proveedor con código de sucursal: {}", codigoSucursal);
 
         ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();
         proveedorRequestDTO.setCodigoSucursal(codigoSucursal);
 
         proveedorService.eliminarProveedor(proveedorRequestDTO);
 
-        log.info("✅ [RESPUESTA] Proveedor eliminado correctamente con Código de Sucursal: {}", codigoSucursal);
+        log.info("📤 [RESPUESTA] Proveedor eliminado correctamente con código de sucursal: {}", codigoSucursal);
 
         return ResponseEntity.ok().build();
     }

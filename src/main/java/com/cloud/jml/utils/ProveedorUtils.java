@@ -70,15 +70,16 @@ public class ProveedorUtils {
      * 🔍 Valida la existencia de un cliente en BD.
      */
     public ProveedorEntity validarExistenciaProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 Validando existencia de Proveedor: {} con Código de Sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
+        log.info("🔍 [SOLICITUD] Validando existencia de proveedor: {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
         Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
 
         if (optionalProveedor.isPresent()) {
             ProveedorEntity proveedorEntity = optionalProveedor.get();
-            log.info("✅ Proveedor encontrado con Cdigo de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+            log.info("✅ [FINALIZADO] Proveedor encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+
             return proveedorEntity;
         } else {
-            log.warn("⚠️ Proveedor no encontrado con Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+            log.warn("❌ [RESULTADO] Proveedor no encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
             throw new ProveedorNoEncontradoException(proveedorRequestDTO.getCodigoSucursal());
         }
     }

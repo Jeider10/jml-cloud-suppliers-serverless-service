@@ -23,7 +23,7 @@ public class ProveedorMapper {
      * 📦 Convierte un DTO de solicitud de proveedor en una entidad lista para persistir.
      */
     public ProveedorEntity mapRequestDtoToEntity(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("📦 Iniciando mapeo DTO → Entity para proveedor");
+        log.info("📦 [MAPEO] Iniciando mapeo DTO → Entity para proveedor");
 
         ProveedorEntity proveedorEntity = new ProveedorEntity();
 
@@ -34,7 +34,7 @@ public class ProveedorMapper {
         proveedorEntity.setCorreo(proveedorRequestDTO.getCorreo());
         proveedorEntity.setFechaCreacion(LocalDateTime.now());
 
-        log.info("✅ Mapeo completado DTO → Entity para proveedor");
+        log.info("✅ [MAPEO] Mapeo completado DTO → Entity para proveedor");
 
         return proveedorEntity;
     }
@@ -43,7 +43,7 @@ public class ProveedorMapper {
      * 📦 Convierte una entidad de proveedor en un DTO de respuesta.
      */
     public ProveedorResponseDTO mapEntityToResponseDto(ProveedorEntity proveedorEntity) {
-        log.info("📦 Iniciando mapeo Entity → DTO para Proveedor");
+        log.info("📦 [MAPEO] Iniciando mapeo Entity → DTO para Proveedor");
 
         ProveedorResponseDTO proveedorResponseDTO = new ProveedorResponseDTO();
 
@@ -56,7 +56,7 @@ public class ProveedorMapper {
         // 🕓 Formateo de fechas
         proveedorFormatearFecha.asignarFechasFormateadas(proveedorEntity, proveedorResponseDTO);
 
-        log.info("✅ Mapeo completado Entity → DTO para Proveedor");
+        log.info("✅ [MAPEO] Mapeo completado Entity → DTO para Proveedor");
 
         return proveedorResponseDTO;
     }
@@ -65,7 +65,7 @@ public class ProveedorMapper {
      * ✏️ Actualiza una entidad de proveedor existente con los datos del DTO.
      */
     public void actualizarDatosProveedor(ProveedorRequestDTO proveedorRequestDTO, ProveedorEntity proveedorEntity) {
-        log.info("✏️ Actualizando proveedor existente: Código de Sucursal={}", proveedorEntity.getCodigoSucursal());
+        log.info("✏️ [SOLICITUD] Actualizando proveedor existente: código de sucursal={}", proveedorEntity.getCodigoSucursal());
 
         // Actualizamos solo los campos permitidos
         proveedorEntity.setCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
@@ -77,6 +77,6 @@ public class ProveedorMapper {
         // Actualizamos la fecha de actualización
         proveedorEntity.setFechaActualizacion(LocalDateTime.now());
 
-        log.info("✅ Proveedor actualizado correctamente: Código de Sucursal={}", proveedorEntity.getCodigoSucursal());
+        log.info("✅ [FINALIZADO] Proveedor actualizado correctamente: código de sucursal={}", proveedorEntity.getCodigoSucursal());
     }
 }

@@ -33,7 +33,7 @@ public class ProveedorService {
 
     @Transactional(readOnly = true)
     public List<ProveedorResponseDTO> listarProveedores() {
-        log.info("📌 Inicio de búsqueda de todos los Proveedores");
+        log.info("🔍 [CONSULTA] Recuperando todos los proveedores desde la base de datos");
 
         List<ProveedorEntity> proveedoresEntity = proveedorRepository.findAll();
 
@@ -60,53 +60,52 @@ public class ProveedorService {
 
     @Transactional
     public ProveedorResponseDTO crearProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Inicio de creación de Proveedor: {}", proveedorRequestDTO.getNombre());
+        log.info("🔍 [CONSULTA] Inicio de creación de proveedor: {}", proveedorRequestDTO.getNombre());
 
-        Optional<ProveedorEntity> byCodigoSucursal = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+        Optional<ProveedorEntity> proveedorExistente = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
 
-        if (byCodigoSucursal.isPresent()) {
+        if (proveedorExistente.isPresent()) {
             log.warn("❌ [ERROR] Proveedor duplicado detectado: {}", proveedorRequestDTO.getCodigoSucursal());
             throw new ProveedorDuplicadoException(proveedorRequestDTO.getCodigoSucursal());
         }
 
-        // Mapeo de DTO a Entity
         log.info("📦 [MAPEO] Transformando DTO a entidad de proveedor");
         ProveedorEntity proveedorEntity = mapper.mapRequestDtoToEntity(proveedorRequestDTO);
-        log.info("📦 [MAPEO] Proveedor mapeado a entidad. Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+        log.info("📦 [MAPEO] Proveedor: {} mapeado a entidad con código de sucursal: {}", proveedorEntity.getNombre(), proveedorEntity.getCodigoSucursal());
 
-        ProveedorEntity guardado = proveedorUtils.guardarProveedorBD(proveedorEntity);
-        log.info("💾 [PERSISTENCIA] Proveedor guardado exitosamente. Código de Sucursal: {}", guardado.getCodigoSucursal());
+        ProveedorEntity guardarProveedor = proveedorUtils.guardarProveedorBD(proveedorEntity);
+        log.info("💾 [PERSISTENCIA] Proveedor: {} guardado exitosamente con código de sucursal: {}", guardarProveedor.getNombre(), guardarProveedor.getCodigoSucursal());
 
         log.info("📦 [MAPEO] Transformando entidad de proveedor a DTO. (crearProveedor)");
-        ProveedorResponseDTO proveedorResponseDTO = mapper.mapEntityToResponseDto(guardado);
-        log.info("📦 [MAPEO] Proveedor mapeado a DTO. Código de Sucursal: {}, nombre: {}",
-                guardado.getCodigoSucursal(), guardado.getNombre());
+        ProveedorResponseDTO proveedorResponseDTO = mapper.mapEntityToResponseDto(guardarProveedor);
+        log.info("📦 [MAPEO] Proveedor: {} mapeado a DTO con código de sucursal: {}",
+                proveedorResponseDTO.getNombre(), proveedorResponseDTO.getCodigoSucursal());
 
-        log.info("✅ [FINALIZADO] Proveedor creado exitosamente. Código de Sucursal: {}", guardado.getCodigoSucursal());
+        log.info("✅ [FINALIZADO] Proveedor creado exitosamente: {} con código de sucursal: {}", proveedorResponseDTO.getNombre(), proveedorResponseDTO.getCodigoSucursal());
 
         return proveedorResponseDTO;
     }
 
     @Transactional(readOnly = true)
     public ProveedorResponseDTO obtenerProveedorPorCodigoSucursal(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Iniciando búsqueda de proveedor por Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+        log.info("🔍 [CONSULTA] Iniciando búsqueda de proveedor por código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
 
-        Optional<ProveedorEntity> optionalProveedorEntity = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+        Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
 
-        if (optionalProveedorEntity.isEmpty()) {
-            log.warn("❌ [RESULTADO] Proveedor no encontrado con Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+        if (optionalProveedor.isEmpty()) {
+            log.warn("❌ [RESULTADO] Proveedor no encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
             return null;
         }
 
-        ProveedorEntity proveedorEntity = optionalProveedorEntity.get();
-        log.info("📦 [ENCONTRADO] Proveedor encontrado -> Código de Sucursal: {}, nombre: {}",
+        ProveedorEntity proveedorEntity = optionalProveedor.get();
+        log.info("📦 [ENCONTRADO] Proveedor encontrado -> código de sucursal: {}, nombre: {}",
                 proveedorEntity.getCodigoSucursal(), proveedorEntity.getNombre());
 
         log.info("📦 [MAPEO] Transformando entidad de proveedor a DTO. (obtenerProveedorPorCodigoSucursal)");
         ProveedorResponseDTO proveedorResponseDTO = mapper.mapEntityToResponseDto(proveedorEntity);
-        log.info("📦 [MAPEO] Proveedor mapeado a DTO. Código de Sucursal: {}", proveedorResponseDTO.getCodigoSucursal());
+        log.info("📦 [MAPEO] Proveedor mapeado a DTO. código de sucursal: {}", proveedorResponseDTO.getCodigoSucursal());
 
-        log.info("✅ [FINALIZADO] Proveedor encontrado y mapeado a DTO. Código de Sucursal: {}", proveedorResponseDTO.getCodigoSucursal());
+        log.info("✅ [FINALIZADO] Proveedor encontrado y mapeado a DTO. código de sucursal: {}", proveedorResponseDTO.getCodigoSucursal());
 
         return proveedorResponseDTO;
     }
@@ -115,17 +114,17 @@ public class ProveedorService {
     public List<ProveedorResponseDTO> obtenerProveedorPorNombre(ProveedorRequestDTO proveedorRequestDTO) {
         log.info("🔍 [CONSULTA] Iniciando búsqueda de proveedor por nombre: {}", proveedorRequestDTO.getNombre());
 
-        List<ProveedorEntity> proveedoresEntity = proveedorRepository.findByNombreContainingIgnoreCase(proveedorRequestDTO.getNombre());
+        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByNombreContainingIgnoreCase(proveedorRequestDTO.getNombre());
 
-        if (proveedoresEntity.isEmpty()) {
+        if (proveedorEntity.isEmpty()) {
             log.warn("❌ [RESULTADO] No se encontraron proveedores con nombre: {}", proveedorRequestDTO.getNombre());
             return List.of();
         }
 
-        log.info("📦 [MAPEO] Transformando entidades de proveedores a DTOs. (obtenerProveedorPorNombre)");
+        log.info("📦 [MAPEO] Transformando {} entidades de proveedores a DTOs. (nombre: {})", proveedorEntity.size(), proveedorRequestDTO.getNombre());
 
         // convertir a stream
-        Stream<ProveedorEntity> streamProveedores = proveedoresEntity.stream();
+        Stream<ProveedorEntity> streamProveedores = proveedorEntity.stream();
 
         // mapear entidades a DTOs
         Stream<ProveedorResponseDTO> streamDto = streamProveedores.map(mapper::mapEntityToResponseDto);
@@ -133,14 +132,14 @@ public class ProveedorService {
         // recolectar en lista
         List<ProveedorResponseDTO> proveedorResponse = streamDto.toList();
 
-        log.info("✅ [FINALIZADO] Proveedores encontrados con nombre '{}'. Total encontrados: {}", proveedorRequestDTO.getNombre(), proveedorResponse.size());
+        log.info("✅ [FINALIZADO] Proveedores encontrados con nombre: {}. Total encontrados: {}", proveedorRequestDTO.getNombre(), proveedorResponse.size());
 
         return proveedorResponse;
     }
 
     @Transactional
     public ProveedorResponseDTO actualizarProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Inicio de actualización de proveedor: {} con Código de Sucursal: {}",
+        log.info("🔍 [CONSULTA] Inicio de actualización de proveedor: {} con código de sucursal: {}",
                 proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
 
         // Paso 1: Validar existencia
@@ -151,33 +150,33 @@ public class ProveedorService {
 
         // Paso 3: Guardar cambios en la BD
         ProveedorEntity actualizado = proveedorUtils.guardarProveedorBD(proveedorEntity);
-        log.info("💾 [PERSISTENCIA] Proveedor actualizado. Código de Sucursal: {}", actualizado.getCodigoSucursal());
+        log.info("💾 [PERSISTENCIA] Proveedor actualizado: {} con código de sucursal: {}", actualizado.getNombre(), actualizado.getCodigoSucursal());
 
         // Paso 4: Mapear a DTO
         log.info("📦 [MAPEO] Transformando entidad de proveedor a DTO. (actualizarProveedor)");
         ProveedorResponseDTO proveedorResponseDTO = mapper.mapEntityToResponseDto(actualizado);
-        log.info("📦 [MAPEO] Proveedor mapeado a DTO. Código de Sucursal: {}, nombre: {}, dirección: {}",
+        log.info("📦 [MAPEO] Proveedor mapeado a DTO. código de sucursal: {}, nombre: {}, dirección: {}",
                 proveedorResponseDTO.getCodigoSucursal(), proveedorResponseDTO.getNombre(), proveedorResponseDTO.getDireccion());
 
-        log.info("✅ [FINALIZADO] Actualización de proveedor completada. Código de Sucursal: {}", proveedorResponseDTO.getCodigoSucursal());
+        log.info("✅ [FINALIZADO] Actualización de proveedor completada: {} con código de sucursal: {}", proveedorResponseDTO.getNombre(), proveedorResponseDTO.getCodigoSucursal());
 
         return proveedorResponseDTO;
     }
 
     @Transactional
     public void eliminarProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Inicio de eliminación de proveedor con Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+        log.info("🔍 [CONSULTA] Inicio de eliminación de proveedor con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
 
-        Optional<ProveedorEntity> proveedorOptional = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+        Optional<ProveedorEntity> proveedorExistente = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
 
-        if (proveedorOptional.isPresent()) {
-            ProveedorEntity proveedorEntity = proveedorOptional.get();
-            log.info("📦 [ENCONTRADO] Proveedor encontrado con Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+        if (proveedorExistente.isPresent()) {
+            ProveedorEntity proveedorEntity = proveedorExistente.get();
+            log.info("📦 [ENCONTRADO] Proveedor encontrado: {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
 
             proveedorUtils.eliminarProveedorBD(proveedorEntity);
-            log.info("🗑️ [ELIMINADO] Proveedor eliminado correctamente -> {} con Código de Sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
+            log.info("🗑️ [ELIMINADO] Proveedor eliminado correctamente -> {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
         } else {
-            log.warn("❌ [NO ENCONTRADO] Proveedor no encontrado con Código de Sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+            log.warn("❌ [NO ENCONTRADO] Proveedor no encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
             throw new ProveedorNoEncontradoException(proveedorRequestDTO.getCodigoSucursal());
         }
     }
