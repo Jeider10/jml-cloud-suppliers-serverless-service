@@ -13,9 +13,6 @@ import java.time.LocalDateTime;
 public class ProveedorEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(name = "codigo_sucursal", nullable = false)
     private Long codigoSucursal;
 
