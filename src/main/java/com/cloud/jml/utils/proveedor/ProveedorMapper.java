@@ -1,4 +1,4 @@
-package com.cloud.jml.utils;
+package com.cloud.jml.utils.proveedor;
 
 import com.cloud.jml.dto.ProveedorRequestDTO;
 import com.cloud.jml.dto.ProveedorResponseDTO;
@@ -19,9 +19,6 @@ public class ProveedorMapper {
         log.info("🔥 ProveedorMapper inicializado correctamente.");
     }
 
-    /**
-     * 📦 Convierte un DTO de solicitud de proveedor en una entidad lista para persistir.
-     */
     public ProveedorEntity mapRequestDtoToEntity(ProveedorRequestDTO proveedorRequestDTO) {
         log.info("📦 [MAPEO] Iniciando mapeo DTO → Entity para proveedor");
 
@@ -39,9 +36,6 @@ public class ProveedorMapper {
         return proveedorEntity;
     }
 
-    /**
-     * 📦 Convierte una entidad de proveedor en un DTO de respuesta.
-     */
     public ProveedorResponseDTO mapEntityToResponseDto(ProveedorEntity proveedorEntity) {
         log.info("📦 [MAPEO] Iniciando mapeo Entity → DTO para Proveedor");
 
@@ -61,9 +55,6 @@ public class ProveedorMapper {
         return proveedorResponseDTO;
     }
 
-    /**
-     * ✏️ Actualiza una entidad de proveedor existente con los datos del DTO.
-     */
     public void actualizarDatosProveedor(ProveedorRequestDTO proveedorRequestDTO, ProveedorEntity proveedorEntity) {
         log.info("✏️ [SOLICITUD] Actualizando proveedor existente: código de sucursal={}", proveedorEntity.getCodigoSucursal());
 

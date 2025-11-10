@@ -4,6 +4,7 @@ import com.cloud.jml.dto.ProveedorRequestDTO;
 import com.cloud.jml.dto.ProveedorResponseDTO;
 import com.cloud.jml.service.ProveedorService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +13,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/proveedores")
-@CrossOrigin(origins = "http://localhost:8080")
 public class ProveedorController {
 
     private final ProveedorService proveedorService;
@@ -28,6 +28,11 @@ public class ProveedorController {
 
         List<ProveedorResponseDTO> proveedores = proveedorService.listarProveedores();
 
+        if (proveedores == null || proveedores.isEmpty()) {
+            log.warn("📤 [RESPUESTA] No se encontraron proveedores");
+            return ResponseEntity.noContent().build();
+        }
+
         log.info("📤 [RESPUESTA] Se retornan {} proveedores", proveedores.size());
 
         return ResponseEntity.ok(proveedores);
@@ -38,6 +43,11 @@ public class ProveedorController {
         log.info("📥 [SOLICITUD] Crear Proveedor: {}", proveedorRequestDTO.getNombre());
 
         ProveedorResponseDTO response = proveedorService.crearProveedor(proveedorRequestDTO);
+
+        if (response == null || response.getCodigoSucursal().describeConstable().isEmpty()) {
+            log.warn("📤 [RESPUESTA] Error al crear el proveedor: {}", proveedorRequestDTO.getNombre());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         log.info("📤 [RESPUESTA] Proveedor creado: {} con código de sucursal: {}", response.getNombre(), response.getCodigoSucursal());
 
@@ -53,6 +63,11 @@ public class ProveedorController {
 
         ProveedorResponseDTO proveedor = proveedorService.obtenerProveedorPorCodigoSucursal(proveedorRequestDTO);
 
+        if (proveedor == null || proveedor.getCodigoSucursal().describeConstable().isEmpty()) {
+            log.warn("📤 [RESPUESTA] Proveedor no encontrado con código de sucursal: {}", codigoSucursal);
+            return ResponseEntity.noContent().build();
+        }
+
         log.info("📤 [RESPUESTA] Proveedor encontrado con código de sucursal: {}", proveedor.getCodigoSucursal());
 
         return ResponseEntity.ok(proveedor);
@@ -67,6 +82,11 @@ public class ProveedorController {
 
         List<ProveedorResponseDTO> proveedor = proveedorService.obtenerProveedorPorNombre(proveedorRequestDTO);
 
+        if (proveedor == null || proveedor.isEmpty()) {
+            log.warn("📤 [RESPUESTA] Proveedor no encontrado con nombre: {}", proveedorRequestDTO.getNombre());
+            return ResponseEntity.noContent().build();
+        }
+
         log.info("📤 [RESPUESTA] Se retornan {} proveedores con nombre: {}", proveedor.size(), proveedorRequestDTO.getNombre());
 
         return ResponseEntity.ok(proveedor);
@@ -77,6 +97,11 @@ public class ProveedorController {
         log.info("📥 [SOLICITUD] Actualizar proveedor con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
 
         ProveedorResponseDTO proveedorResponseDTO = proveedorService.actualizarProveedor(proveedorRequestDTO);
+
+        if (proveedorResponseDTO == null || proveedorResponseDTO.getCodigoSucursal().describeConstable().isEmpty()) {
+            log.warn("📤 [RESPUESTA] Error al actualizar el proveedor con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         log.info("📤 [RESPUESTA] Proveedor actualizado correctamente: {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
 

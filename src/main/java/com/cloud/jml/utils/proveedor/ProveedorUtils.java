@@ -1,4 +1,4 @@
-package com.cloud.jml.utils;
+package com.cloud.jml.utils.proveedor;
 
 import com.cloud.jml.dto.ProveedorRequestDTO;
 import com.cloud.jml.exception.proveedor.ProveedorDeletionException;
@@ -24,9 +24,21 @@ public class ProveedorUtils {
         log.info("🔥 ProveedorUtils inicializado correctamente.");
     }
 
-    /**
-     * 💾 Guarda la orden en BD con manejo de excepciones.
-     */
+    public ProveedorEntity validarExistenciaProveedor(ProveedorRequestDTO proveedorRequestDTO) {
+        log.info("🔍 [SOLICITUD] Validando existencia de proveedor: {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
+        Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+
+        if (optionalProveedor.isPresent()) {
+            ProveedorEntity proveedorEntity = optionalProveedor.get();
+            log.info("✅ [FINALIZADO] Proveedor encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+
+            return proveedorEntity;
+        } else {
+            log.warn("❌ [RESULTADO] Proveedor no encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+            throw new ProveedorNoEncontradoException(proveedorRequestDTO.getCodigoSucursal());
+        }
+    }
+
     public ProveedorEntity guardarProveedorBD(ProveedorEntity proveedorEntity) {
         try {
             return proveedorRepository.save(proveedorEntity);
@@ -45,9 +57,6 @@ public class ProveedorUtils {
         }
     }
 
-    /**
-     * 🗑️ Elimina la orden de BD con manejo de excepciones.
-     */
     public void eliminarProveedorBD(ProveedorEntity proveedorEntity) {
         try {
             proveedorRepository.delete(proveedorEntity);
@@ -63,24 +72,6 @@ public class ProveedorUtils {
         } catch (Exception e) {
             log.error("🚨 Error inesperado al eliminar el proveedor: {}", e.getMessage(), e);
             throw new ProveedorDeletionException("Error inesperado al eliminar el proveedor", e);
-        }
-    }
-
-    /**
-     * 🔍 Valida la existencia de un cliente en BD.
-     */
-    public ProveedorEntity validarExistenciaProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [SOLICITUD] Validando existencia de proveedor: {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
-        Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
-
-        if (optionalProveedor.isPresent()) {
-            ProveedorEntity proveedorEntity = optionalProveedor.get();
-            log.info("✅ [FINALIZADO] Proveedor encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
-
-            return proveedorEntity;
-        } else {
-            log.warn("❌ [RESULTADO] Proveedor no encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
-            throw new ProveedorNoEncontradoException(proveedorRequestDTO.getCodigoSucursal());
         }
     }
 }

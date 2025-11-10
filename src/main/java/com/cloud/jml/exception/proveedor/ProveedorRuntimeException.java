@@ -12,4 +12,9 @@ public class ProveedorRuntimeException extends RuntimeException {
         super(message);
         this.status = status;
     }
+
+    public ProveedorRuntimeException(HttpStatus status, String message, Throwable cause) {
+        super(message, cause);
+        this.status = status;
+    }
 }
