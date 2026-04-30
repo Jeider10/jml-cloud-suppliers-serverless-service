@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Slf4j
-@Component  // 🔹 Anotación para indicar que es un componente de Spring
+@Component  // 🔹 Anotacion para indicar que es un componente de Spring
 public class ProveedorUtils {
 
     private final ProveedorRepository proveedorRepository;
@@ -25,16 +25,16 @@ public class ProveedorUtils {
     }
 
     public ProveedorEntity validarExistenciaProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [SOLICITUD] Validando existencia de proveedor: {} con código de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
+        log.info("🔍 [SOLICITUD] Validando existencia de proveedor: {} con codigo de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
         Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
 
         if (optionalProveedor.isPresent()) {
             ProveedorEntity proveedorEntity = optionalProveedor.get();
-            log.info("✅ [FINALIZADO] Proveedor encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+            log.info("✅ [FINALIZADO] Proveedor encontrado con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
 
             return proveedorEntity;
         } else {
-            log.warn("❌ [RESULTADO] Proveedor no encontrado con código de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+            log.warn("❌ [RESULTADO] Proveedor no encontrado con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
             throw new ProveedorNoEncontradoException(proveedorRequestDTO.getCodigoSucursal());
         }
     }
@@ -44,16 +44,16 @@ public class ProveedorUtils {
             return proveedorRepository.save(proveedorEntity);
 
         } catch (DataIntegrityViolationException e) {
-            log.error("🚨 Violación de integridad al guardar el proveedor: {}", e.getMessage(), e);
-            throw new ProveedorPersistenceException("Error de integridad en base de datos al guardar el proveedor", e);
+            log.error("🚨 Violacion de integridad al guardar el proveedor: {}", e.getMessage(), e);
+            throw ProveedorPersistenceException.integrityViolation(e);
 
         } catch (DataAccessException e) {
             log.error("🚨 Error de acceso a datos al guardar el proveedor: {}", e.getMessage(), e);
-            throw new ProveedorPersistenceException("Error al guardar el proveedor en la base de datos", e);
+            throw ProveedorPersistenceException.dataAccessError(e);
 
         } catch (Exception e) {
             log.error("🚨 Error inesperado al guardar el proveedor: {}", e.getMessage(), e);
-            throw new ProveedorPersistenceException("Error inesperado al registrar el proveedor", e);
+            throw ProveedorPersistenceException.unexpected(e);
         }
     }
 
@@ -62,16 +62,16 @@ public class ProveedorUtils {
             proveedorRepository.delete(proveedorEntity);
 
         } catch (DataIntegrityViolationException e) {
-            log.error("🚨 Violación de integridad al eliminar el proveedor: {}", e.getMessage(), e);
-            throw new ProveedorDeletionException("Error de integridad en base de datos al eliminar el proveedor", e);
+            log.error("🚨 Violacion de integridad al eliminar el proveedor: {}", e.getMessage(), e);
+            throw ProveedorDeletionException.integrityViolation(e);
 
         } catch (DataAccessException e) {
             log.error("🚨 Error de acceso a datos al eliminar el proveedor: {}", e.getMessage(), e);
-            throw new ProveedorDeletionException("Error al eliminar el proveedor en la base de datos", e);
+            throw ProveedorDeletionException.dataAccessError(e);
 
         } catch (Exception e) {
             log.error("🚨 Error inesperado al eliminar el proveedor: {}", e.getMessage(), e);
-            throw new ProveedorDeletionException("Error inesperado al eliminar el proveedor", e);
+            throw ProveedorDeletionException.unexpected(e);
         }
     }
 }

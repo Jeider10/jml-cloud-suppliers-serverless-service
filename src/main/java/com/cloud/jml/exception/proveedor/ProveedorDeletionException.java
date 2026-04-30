@@ -5,21 +5,21 @@ import org.springframework.http.HttpStatus;
 public class ProveedorDeletionException extends ProveedorRuntimeException {
 
     public ProveedorDeletionException(String message) {
-        super(HttpStatus.INTERNAL_SERVER_ERROR, "🗑️ [ELIMINACIÓN] " + message);
+        super(HttpStatus.INTERNAL_SERVER_ERROR, "🗑️ [ELIMINACION] " + message);
     }
 
     public ProveedorDeletionException(String message, Throwable cause) {
         super(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "🗑️ [ELIMINACIÓN] " + message +
+                "🗑️ [ELIMINACION] " + message +
                         (cause != null ? " | 💥 Causa: " + cause.getMessage() : "")
         );
     }
 
-    // 🔒 Violación de integridad referencial (por constraints o dependencias)
+    // 🔒 Violacion de integridad referencial (por constraints o dependencias)
     public static ProveedorDeletionException integrityViolation(Throwable cause) {
         return new ProveedorDeletionException(
-                "❌ [INTEGRIDAD] No se pudo eliminar el proveedor debido a una violación de integridad referencial",
+                "❌ [INTEGRIDAD] No se pudo eliminar el proveedor debido a una violacion de integridad referencial",
                 cause
         );
     }
@@ -35,7 +35,7 @@ public class ProveedorDeletionException extends ProveedorRuntimeException {
     // 💥 Error inesperado
     public static ProveedorDeletionException unexpected(Throwable cause) {
         return new ProveedorDeletionException(
-                "💥 [INESPERADO] Ocurrió un error inesperado al intentar eliminar el proveedor",
+                "💥 [INESPERADO] Ocurrio un error inesperado al intentar eliminar el proveedor",
                 cause
         );
     }

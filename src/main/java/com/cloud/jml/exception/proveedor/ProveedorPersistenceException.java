@@ -16,15 +16,15 @@ public class ProveedorPersistenceException extends ProveedorRuntimeException {
         );
     }
 
-    // 🔒 Violación de integridad (constraint, duplicado, etc.) al guardar
+    // 🔒 Violacion de integridad (constraint, duplicado, etc.) al guardar
     public static ProveedorPersistenceException integrityViolation(Throwable cause) {
         return new ProveedorPersistenceException(
-                "❌ [INTEGRIDAD] Violación de integridad en base de datos al guardar el proveedor",
+                "❌ [INTEGRIDAD] Violacion de integridad en base de datos al guardar el proveedor",
                 cause
         );
     }
 
-    // ⚙️ Error técnico de acceso a datos
+    // ⚙️ Error tecnico de acceso a datos
     public static ProveedorPersistenceException dataAccessError(Throwable cause) {
         return new ProveedorPersistenceException(
                 "❌ [DATOS] Error de acceso a datos al intentar guardar el proveedor",
@@ -35,7 +35,7 @@ public class ProveedorPersistenceException extends ProveedorRuntimeException {
     // 💥 Error inesperado
     public static ProveedorPersistenceException unexpected(Throwable cause) {
         return new ProveedorPersistenceException(
-                "💥 [INESPERADO] Ocurrió un error inesperado al registrar el proveedor",
+                "💥 [INESPERADO] Ocurrio un error inesperado al registrar el proveedor",
                 cause
         );
     }

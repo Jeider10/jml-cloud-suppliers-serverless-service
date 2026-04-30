@@ -4,16 +4,16 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public class ProveedorRuntimeException extends RuntimeException {
+public abstract class ProveedorRuntimeException extends RuntimeException {
 
     private final HttpStatus status;
 
-    public ProveedorRuntimeException(HttpStatus status, String message) {
+    protected ProveedorRuntimeException(HttpStatus status, String message) {
         super(message);
         this.status = status;
     }
 
-    public ProveedorRuntimeException(HttpStatus status, String message, Throwable cause) {
+    protected ProveedorRuntimeException(HttpStatus status, String message, Throwable cause) {
         super(message, cause);
         this.status = status;
     }

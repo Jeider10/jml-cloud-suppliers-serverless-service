@@ -7,6 +7,6 @@ public class ProveedorDuplicadoException extends ProveedorRuntimeException {
     public ProveedorDuplicadoException(Long codigoSucursal) {
         super(
                 HttpStatus.CONFLICT,
-                "⚠️ [DUPLICADO] Proveedor duplicado detectado con código de sucursal: " + codigoSucursal);
+                "⚠️ [DUPLICADO] Proveedor duplicado detectado con codigo de sucursal: " + codigoSucursal);
     }
 }

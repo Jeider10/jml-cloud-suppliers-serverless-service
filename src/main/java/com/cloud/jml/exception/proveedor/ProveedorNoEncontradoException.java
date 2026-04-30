@@ -7,6 +7,6 @@ public class ProveedorNoEncontradoException extends ProveedorRuntimeException {
     public ProveedorNoEncontradoException(Long codigoSucursal) {
         super(
                 HttpStatus.NOT_FOUND,
-                "❌ [CONSULTA] Proveedor no encontrado con código de sucursal: " + codigoSucursal);
+                "❌ [CONSULTA] Proveedor no encontrado con codigo de sucursal: " + codigoSucursal);
     }
 }

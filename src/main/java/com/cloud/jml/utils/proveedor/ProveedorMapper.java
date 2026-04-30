@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Slf4j
-@Component // 🔹 Anotación para indicar que es un componente de Spring
+@Component // 🔹 Anotacion para indicar que es un componente de Spring
 public class ProveedorMapper {
 
     private final ProveedorFormatearFecha proveedorFormatearFecha;
@@ -56,7 +56,7 @@ public class ProveedorMapper {
     }
 
     public void actualizarDatosProveedor(ProveedorRequestDTO proveedorRequestDTO, ProveedorEntity proveedorEntity) {
-        log.info("✏️ [SOLICITUD] Actualizando proveedor existente: código de sucursal={}", proveedorEntity.getCodigoSucursal());
+        log.info("✏️ [SOLICITUD] Actualizando proveedor existente: codigo de sucursal={}", proveedorEntity.getCodigoSucursal());
 
         // Actualizamos solo los campos permitidos
         proveedorEntity.setCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
@@ -65,9 +65,9 @@ public class ProveedorMapper {
         proveedorEntity.setTelefono(proveedorRequestDTO.getTelefono());
         proveedorEntity.setDireccion(proveedorRequestDTO.getDireccion());
 
-        // Actualizamos la fecha de actualización
+        // Actualizamos la fecha de actualizacion
         proveedorEntity.setFechaActualizacion(LocalDateTime.now());
 
-        log.info("✅ [FINALIZADO] Proveedor actualizado correctamente: código de sucursal={}", proveedorEntity.getCodigoSucursal());
+        log.info("✅ [FINALIZADO] Proveedor actualizado correctamente: codigo de sucursal={}", proveedorEntity.getCodigoSucursal());
     }
 }
