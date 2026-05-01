@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -133,6 +134,31 @@ public class ProveedorService {
         List<ProveedorResponseDTO> proveedorResponse = streamDto.toList();
 
         log.info("✅ [FINALIZADO] Proveedores encontrados con nombre: {}. Total encontrados: {}", proveedorRequestDTO.getNombre(), proveedorResponse.size());
+
+        return proveedorResponse;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProveedorResponseDTO> obtenerProveedorPorFechaCreacion(String fechaInicio, String fechaFin) {
+        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedores por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
+
+        LocalDateTime inicio = proveedorUtils.parsearFechaInicio(fechaInicio);
+        LocalDateTime fin = proveedorUtils.parsearFechaFin(fechaFin);
+
+        log.info("📅 [RANGO] Buscando proveedores entre {} y {}", inicio, fin);
+
+        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByFechaCreacionBetween(inicio, fin);
+
+        if (proveedorEntity.isEmpty()) {
+            log.warn("❌ [RESULTADO] No se encontraron proveedores en el rango de fechas: {} - {}", inicio, fin);
+            return List.of();
+        }
+
+        List<ProveedorResponseDTO> proveedorResponse = proveedorEntity.stream()
+                .map(mapper::mapEntityToResponseDto)
+                .toList();
+
+        log.info("✅ [FINALIZADO] Proveedores encontrados en rango de fechas. Total: {}", proveedorResponse.size());
 
         return proveedorResponse;
     }

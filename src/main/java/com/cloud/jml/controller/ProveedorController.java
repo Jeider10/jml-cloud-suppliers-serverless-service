@@ -95,6 +95,25 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedor);
     }
 
+    @GetMapping("/fechaCreacion")
+    public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorFechaCreacion(
+            @RequestParam("fechaInicio") String fechaInicio,
+            @RequestParam("fechaFin") String fechaFin) {
+
+        log.info("📥 [SOLICITUD] Buscar proveedores por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
+
+        List<ProveedorResponseDTO> proveedoresFecha = proveedorService.obtenerProveedorPorFechaCreacion(fechaInicio, fechaFin);
+
+        if (proveedoresFecha == null || proveedoresFecha.isEmpty()) {
+            log.warn("⚠️ [RESPUESTA] No se encontraron proveedores en el rango de fechas.");
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores en el rango de fechas.", proveedoresFecha.size());
+
+        return ResponseEntity.ok(proveedoresFecha);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<ProveedorResponseDTO> actualizarProveedor(@Valid @RequestBody ProveedorRequestDTO proveedorRequestDTO) {
         log.info("📥 [SOLICITUD] Actualizar proveedor con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());

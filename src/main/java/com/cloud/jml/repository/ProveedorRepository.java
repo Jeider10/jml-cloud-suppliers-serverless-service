@@ -3,6 +3,7 @@ package com.cloud.jml.repository;
 import com.cloud.jml.model.ProveedorEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,6 @@ public interface ProveedorRepository extends JpaRepository<ProveedorEntity, Long
     List<ProveedorEntity> findByNombre(String nombre);
 
     List<ProveedorEntity> findByNombreContainingIgnoreCase(String nombre);
+
+    List<ProveedorEntity> findByFechaCreacionBetween(LocalDateTime inicio, LocalDateTime fin);
 }
