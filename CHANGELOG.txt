@@ -1,0 +1,9 @@
+=====================================
+ JML Cloud - Suppliers Service
+ Historial de Cambios
+=====================================
+
+[1.0.0-SNAPSHOT] - 2026-07-26 - (Jeider Montiel)
+  - Version inicial del servicio de proveedores.
+  - CRUD completo de proveedores.
+  - Busqueda y filtrado de proveedores.
