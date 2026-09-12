@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProveedorRepository extends JpaRepository<ProveedorEntity, Long> {
-    Optional<ProveedorEntity> findByCodigoSucursal(Long codigoSucursal);
+public interface ProveedorRepository extends JpaRepository<ProveedorEntity, String> {
+    Optional<ProveedorEntity> findByCodigoSucursal(String codigoSucursal);
 
     List<ProveedorEntity> findByNombre(String nombre);
 

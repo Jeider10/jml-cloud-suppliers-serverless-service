@@ -57,7 +57,7 @@ public class ProveedorController {
     }
 
     @GetMapping("/codigoSucursal")
-    public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigoSucursal") Long codigoSucursal) {
+    public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigoSucursal") String codigoSucursal) {
         log.info("📥 [SOLICITUD] Buscar proveedor por codigo de sucursal: {}", codigoSucursal);
 
         ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();
@@ -132,7 +132,7 @@ public class ProveedorController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> eliminarProveedor(@RequestParam("codigoSucursal") Long codigoSucursal) {
+    public ResponseEntity<Void> eliminarProveedor(@RequestParam("codigoSucursal") String codigoSucursal) {
         log.info("📥 [SOLICITUD] Eliminar proveedor con codigo de sucursal: {}", codigoSucursal);
 
         ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();

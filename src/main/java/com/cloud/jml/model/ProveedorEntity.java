@@ -1,6 +1,9 @@
 package com.cloud.jml.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +21,7 @@ public class ProveedorEntity {
 
     @Id
     @Column(name = "codigo_sucursal", nullable = false)
-    private Long codigoSucursal;
+    private String codigoSucursal;
 
     @Column(nullable = false)
     private String nombre;

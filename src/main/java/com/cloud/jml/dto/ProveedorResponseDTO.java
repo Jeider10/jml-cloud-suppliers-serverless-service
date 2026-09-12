@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor // Constructor con todos los argumentos
 public class ProveedorResponseDTO {
 
-    private Long codigoSucursal;
+    private String codigoSucursal;
     private String nombre;
     private String telefono;
     private String direccion;
