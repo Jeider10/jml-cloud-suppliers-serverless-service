@@ -14,5 +14,9 @@ public interface ProveedorRepository extends JpaRepository<ProveedorEntity, Stri
 
     List<ProveedorEntity> findByNombreContainingIgnoreCase(String nombre);
 
+    List<ProveedorEntity> findByCorreoContainingIgnoreCase(String correo);
+
     List<ProveedorEntity> findByFechaCreacionBetween(LocalDateTime inicio, LocalDateTime fin);
+
+    List<ProveedorEntity> findByFechaActualizacionBetween(LocalDateTime inicio, LocalDateTime fin);
 }

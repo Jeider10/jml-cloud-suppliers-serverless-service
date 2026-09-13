@@ -163,6 +163,49 @@ public class ProveedorService {
         return proveedorResponse;
     }
 
+    @Transactional(readOnly = true)
+    public List<ProveedorResponseDTO> obtenerProveedorPorCorreo(String correo) {
+        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedores por correo: {}", correo);
+
+        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByCorreoContainingIgnoreCase(correo);
+
+        if (proveedorEntity.isEmpty()) {
+            log.warn("❌ [RESULTADO] No se encontraron proveedores con correo: {}", correo);
+            return List.of();
+        }
+
+        List<ProveedorResponseDTO> proveedorResponse = proveedorEntity.stream()
+                .map(mapper::mapEntityToResponseDto)
+                .toList();
+
+        log.info("✅ [FINALIZADO] Proveedores encontrados con correo: {}. Total: {}", correo, proveedorResponse.size());
+
+        return proveedorResponse;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProveedorResponseDTO> obtenerProveedorPorFechaActualizacion(String fechaInicio, String fechaFin) {
+        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedores por fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
+
+        LocalDateTime inicio = proveedorUtils.parsearFechaInicio(fechaInicio);
+        LocalDateTime fin = proveedorUtils.parsearFechaFin(fechaFin);
+
+        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByFechaActualizacionBetween(inicio, fin);
+
+        if (proveedorEntity.isEmpty()) {
+            log.warn("❌ [RESULTADO] No se encontraron proveedores en el rango de fecha de actualizacion.");
+            return List.of();
+        }
+
+        List<ProveedorResponseDTO> proveedorResponse = proveedorEntity.stream()
+                .map(mapper::mapEntityToResponseDto)
+                .toList();
+
+        log.info("✅ [FINALIZADO] Proveedores encontrados por fecha de actualizacion. Total: {}", proveedorResponse.size());
+
+        return proveedorResponse;
+    }
+
     @Transactional
     public ProveedorResponseDTO actualizarProveedor(ProveedorRequestDTO proveedorRequestDTO) {
         log.info("🔍 [CONSULTA] Inicio de actualizacion de proveedor: {} con codigo de sucursal: {}",

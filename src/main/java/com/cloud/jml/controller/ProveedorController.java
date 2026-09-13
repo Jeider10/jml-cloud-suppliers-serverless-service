@@ -114,6 +114,41 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedoresFecha);
     }
 
+    @GetMapping("/correo")
+    public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorCorreo(@RequestParam("correo") String correo) {
+        log.info("📥 [SOLICITUD] Buscar proveedores por correo: {}", correo);
+
+        List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorCorreo(correo);
+
+        if (proveedores == null || proveedores.isEmpty()) {
+            log.warn("⚠️ [RESPUESTA] No se encontraron proveedores con correo: {}", correo);
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores con correo: {}", proveedores.size(), correo);
+
+        return ResponseEntity.ok(proveedores);
+    }
+
+    @GetMapping("/fechaActualizacion")
+    public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorFechaActualizacion(
+            @RequestParam("fechaInicio") String fechaInicio,
+            @RequestParam("fechaFin") String fechaFin) {
+
+        log.info("📥 [SOLICITUD] Buscar proveedores por rango de fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
+
+        List<ProveedorResponseDTO> proveedoresFecha = proveedorService.obtenerProveedorPorFechaActualizacion(fechaInicio, fechaFin);
+
+        if (proveedoresFecha == null || proveedoresFecha.isEmpty()) {
+            log.warn("⚠️ [RESPUESTA] No se encontraron proveedores en el rango de fecha de actualizacion.");
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores por fecha de actualizacion.", proveedoresFecha.size());
+
+        return ResponseEntity.ok(proveedoresFecha);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<ProveedorResponseDTO> actualizarProveedor(@Valid @RequestBody ProveedorRequestDTO proveedorRequestDTO) {
         log.info("📥 [SOLICITUD] Actualizar proveedor con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
