@@ -30,6 +30,9 @@ public class ProveedorEntity {
     private String direccion;
     private String correo;
 
+    @Column(name = "creado_por", length = 150)
+    private String creadoPor;
+
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 

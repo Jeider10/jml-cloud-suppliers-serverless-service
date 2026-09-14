@@ -29,6 +29,7 @@ public class ProveedorMapper {
         proveedorEntity.setTelefono(proveedorRequestDTO.getTelefono());
         proveedorEntity.setDireccion(proveedorRequestDTO.getDireccion());
         proveedorEntity.setCorreo(proveedorRequestDTO.getCorreo());
+        proveedorEntity.setCreadoPor(proveedorRequestDTO.getCreadoPor());
         proveedorEntity.setFechaCreacion(LocalDateTime.now());
 
         log.info("✅ [MAPEO] Mapeo completado DTO → Entity para proveedor");
@@ -46,6 +47,7 @@ public class ProveedorMapper {
         proveedorResponseDTO.setTelefono(proveedorEntity.getTelefono());
         proveedorResponseDTO.setDireccion(proveedorEntity.getDireccion());
         proveedorResponseDTO.setCorreo(proveedorEntity.getCorreo());
+        proveedorResponseDTO.setCreadoPor(proveedorEntity.getCreadoPor());
 
         // 🕓 Formateo de fechas
         proveedorFormatearFecha.asignarFechasFormateadas(proveedorEntity, proveedorResponseDTO);
