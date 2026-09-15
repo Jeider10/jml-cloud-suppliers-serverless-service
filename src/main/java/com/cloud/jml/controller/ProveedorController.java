@@ -1,5 +1,6 @@
 package com.cloud.jml.controller;
 
+import com.cloud.jml.dto.ProveedorPapeleraResponseDTO;
 import com.cloud.jml.dto.ProveedorRequestDTO;
 import com.cloud.jml.dto.ProveedorResponseDTO;
 import com.cloud.jml.service.ProveedorService;
@@ -23,14 +24,15 @@ public class ProveedorController {
         log.info("🔥 ProveedorController inicializado correctamente.");
     }
 
+    // ─── Listar activos ───────────────────────────────────────────────────────
     @GetMapping("/list/all")
     public ResponseEntity<List<ProveedorResponseDTO>> listarProveedores() {
-        log.info("📥 [SOLICITUD] Listar todos los proveedores");
+        log.info("📥 [SOLICITUD] Listar todos los proveedores activos");
 
         List<ProveedorResponseDTO> proveedores = proveedorService.listarProveedores();
 
-        if (proveedores == null || proveedores.isEmpty()) {
-            log.warn("📤 [RESPUESTA] No se encontraron proveedores");
+        if (proveedores.isEmpty()) {
+            log.warn("📤 [RESPUESTA] No se encontraron proveedores activos");
             return ResponseEntity.noContent().build();
         }
 
@@ -39,89 +41,54 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedores);
     }
 
+    // ─── Registrar ────────────────────────────────────────────────────────────
     @PostMapping("/register")
     public ResponseEntity<ProveedorResponseDTO> crearProveedor(@Valid @RequestBody ProveedorRequestDTO proveedorRequestDTO) {
         log.info("📥 [SOLICITUD] Crear Proveedor: {}", proveedorRequestDTO.getNombre());
 
         ProveedorResponseDTO response = proveedorService.crearProveedor(proveedorRequestDTO);
 
-        // FIX: Se reemplazo describeConstable().isEmpty() por validacion null directa — describeConstable() en Long nunca retorna vacio, causando que la validacion nunca detectara errores
-        if (response == null || response.getCodigoSucursal() == null) {
-            log.warn("📤 [RESPUESTA] Error al crear el proveedor: {}", proveedorRequestDTO.getNombre());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        log.info("📤 [RESPUESTA] Proveedor creado: {} con codigo: {}", response.getNombre(), response.getCodigoSucursal());
 
-        log.info("📤 [RESPUESTA] Proveedor creado: {} con codigo de sucursal: {}", response.getNombre(), response.getCodigoSucursal());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // ─── Buscar por código sucursal ───────────────────────────────────────────
     @GetMapping("/codigoSucursal")
     public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigoSucursal") String codigoSucursal) {
         log.info("📥 [SOLICITUD] Buscar proveedor por codigo de sucursal: {}", codigoSucursal);
 
-        ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();
-        proveedorRequestDTO.setCodigoSucursal(codigoSucursal);
+        ProveedorResponseDTO proveedor = proveedorService.obtenerProveedorPorCodigoSucursal(codigoSucursal);
 
-        ProveedorResponseDTO proveedor = proveedorService.obtenerProveedorPorCodigoSucursal(proveedorRequestDTO);
-
-        // FIX: Se reemplazo describeConstable().isEmpty() por validacion null directa — misma correccion que en crearProveedor
-        if (proveedor == null || proveedor.getCodigoSucursal() == null) {
-            log.warn("📤 [RESPUESTA] Proveedor no encontrado con codigo de sucursal: {}", codigoSucursal);
-            return ResponseEntity.noContent().build();
-        }
-
-        log.info("📤 [RESPUESTA] Proveedor encontrado con codigo de sucursal: {}", proveedor.getCodigoSucursal());
+        log.info("📤 [RESPUESTA] Proveedor encontrado: {}", codigoSucursal);
 
         return ResponseEntity.ok(proveedor);
     }
 
+    // ─── Buscar por nombre ────────────────────────────────────────────────────
     @GetMapping("/nombre")
     public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorNombre(@RequestParam("nombre") String nombre) {
         log.info("📥 [SOLICITUD] Buscar proveedor por nombre: {}", nombre);
 
-        ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();
-        proveedorRequestDTO.setNombre(nombre);
+        List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorNombre(nombre);
 
-        List<ProveedorResponseDTO> proveedor = proveedorService.obtenerProveedorPorNombre(proveedorRequestDTO);
-
-        if (proveedor == null || proveedor.isEmpty()) {
-            log.warn("📤 [RESPUESTA] Proveedor no encontrado con nombre: {}", proveedorRequestDTO.getNombre());
+        if (proveedores.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        log.info("📤 [RESPUESTA] Se retornan {} proveedores con nombre: {}", proveedor.size(), proveedorRequestDTO.getNombre());
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores con nombre: {}", proveedores.size(), nombre);
 
-        return ResponseEntity.ok(proveedor);
+        return ResponseEntity.ok(proveedores);
     }
 
-    @GetMapping("/fechaCreacion")
-    public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorFechaCreacion(
-            @RequestParam("fechaInicio") String fechaInicio,
-            @RequestParam("fechaFin") String fechaFin) {
-
-        log.info("📥 [SOLICITUD] Buscar proveedores por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
-
-        List<ProveedorResponseDTO> proveedoresFecha = proveedorService.obtenerProveedorPorFechaCreacion(fechaInicio, fechaFin);
-
-        if (proveedoresFecha == null || proveedoresFecha.isEmpty()) {
-            log.warn("⚠️ [RESPUESTA] No se encontraron proveedores en el rango de fechas.");
-            return ResponseEntity.noContent().build();
-        }
-
-        log.info("📤 [RESPUESTA] Se retornan {} proveedores en el rango de fechas.", proveedoresFecha.size());
-
-        return ResponseEntity.ok(proveedoresFecha);
-    }
-
+    // ─── Buscar por correo ────────────────────────────────────────────────────
     @GetMapping("/correo")
     public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorCorreo(@RequestParam("correo") String correo) {
         log.info("📥 [SOLICITUD] Buscar proveedores por correo: {}", correo);
 
         List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorCorreo(correo);
 
-        if (proveedores == null || proveedores.isEmpty()) {
-            log.warn("⚠️ [RESPUESTA] No se encontraron proveedores con correo: {}", correo);
+        if (proveedores.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
@@ -130,6 +97,42 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedores);
     }
 
+    // ─── Buscar por creadoPor ─────────────────────────────────────────────────
+    @GetMapping("/creadoPor")
+    public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorCreadoPor(@RequestParam("creadoPor") String creadoPor) {
+        log.info("📥 [SOLICITUD] Buscar proveedores por creadoPor: {}", creadoPor);
+
+        List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorCreadoPor(creadoPor);
+
+        if (proveedores.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores creados por: {}", proveedores.size(), creadoPor);
+
+        return ResponseEntity.ok(proveedores);
+    }
+
+    // ─── Buscar por fecha de creación ─────────────────────────────────────────
+    @GetMapping("/fechaCreacion")
+    public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorFechaCreacion(
+            @RequestParam("fechaInicio") String fechaInicio,
+            @RequestParam("fechaFin") String fechaFin) {
+
+        log.info("📥 [SOLICITUD] Buscar proveedores por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
+
+        List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorFechaCreacion(fechaInicio, fechaFin);
+
+        if (proveedores.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores en el rango de fechas", proveedores.size());
+
+        return ResponseEntity.ok(proveedores);
+    }
+
+    // ─── Buscar por fecha de actualización ───────────────────────────────────
     @GetMapping("/fechaActualizacion")
     public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorFechaActualizacion(
             @RequestParam("fechaInicio") String fechaInicio,
@@ -137,45 +140,81 @@ public class ProveedorController {
 
         log.info("📥 [SOLICITUD] Buscar proveedores por rango de fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
 
-        List<ProveedorResponseDTO> proveedoresFecha = proveedorService.obtenerProveedorPorFechaActualizacion(fechaInicio, fechaFin);
+        List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorFechaActualizacion(fechaInicio, fechaFin);
 
-        if (proveedoresFecha == null || proveedoresFecha.isEmpty()) {
-            log.warn("⚠️ [RESPUESTA] No se encontraron proveedores en el rango de fecha de actualizacion.");
+        if (proveedores.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        log.info("📤 [RESPUESTA] Se retornan {} proveedores por fecha de actualizacion.", proveedoresFecha.size());
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores por fecha de actualizacion", proveedores.size());
 
-        return ResponseEntity.ok(proveedoresFecha);
+        return ResponseEntity.ok(proveedores);
     }
 
+    // ─── Actualizar ───────────────────────────────────────────────────────────
     @PutMapping("/update")
     public ResponseEntity<ProveedorResponseDTO> actualizarProveedor(@Valid @RequestBody ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("📥 [SOLICITUD] Actualizar proveedor con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+        log.info("📥 [SOLICITUD] Actualizar proveedor con codigo: {}", proveedorRequestDTO.getCodigoSucursal());
 
-        ProveedorResponseDTO proveedorResponseDTO = proveedorService.actualizarProveedor(proveedorRequestDTO);
+        ProveedorResponseDTO response = proveedorService.actualizarProveedor(proveedorRequestDTO);
 
-        // FIX: Se reemplazo describeConstable().isEmpty() por validacion null directa — misma correccion que en crearProveedor
-        if (proveedorResponseDTO == null || proveedorResponseDTO.getCodigoSucursal() == null) {
-            log.warn("📤 [RESPUESTA] Error al actualizar el proveedor con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        log.info("📤 [RESPUESTA] Proveedor actualizado: {}", response.getCodigoSucursal());
 
-        log.info("📤 [RESPUESTA] Proveedor actualizado correctamente: {} con codigo de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
-
-        return ResponseEntity.ok(proveedorResponseDTO);
+        return ResponseEntity.ok(response);
     }
 
+    // ─── Soft delete (enviar a papelera) ──────────────────────────────────────
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> eliminarProveedor(@RequestParam("codigoSucursal") String codigoSucursal) {
-        log.info("📥 [SOLICITUD] Eliminar proveedor con codigo de sucursal: {}", codigoSucursal);
+    public ResponseEntity<Void> eliminarProveedor(
+            @RequestParam("codigoSucursal") String codigoSucursal,
+            @RequestParam("eliminadoPorId") String eliminadoPorId,
+            @RequestParam("eliminadoPorNombre") String eliminadoPorNombre) {
 
-        ProveedorRequestDTO proveedorRequestDTO = new ProveedorRequestDTO();
-        proveedorRequestDTO.setCodigoSucursal(codigoSucursal);
+        log.info("📥 [SOLICITUD] Enviar a papelera proveedor con codigo: {}", codigoSucursal);
 
-        proveedorService.eliminarProveedor(proveedorRequestDTO);
+        proveedorService.eliminarProveedor(codigoSucursal, eliminadoPorId, eliminadoPorNombre);
 
-        log.info("📤 [RESPUESTA] Proveedor eliminado correctamente con codigo de sucursal: {}", codigoSucursal);
+        log.info("📤 [RESPUESTA] Proveedor {} enviado a papelera por: {}", codigoSucursal, eliminadoPorNombre);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // ─── Listar papelera ──────────────────────────────────────────────────────
+    @GetMapping("/trash")
+    public ResponseEntity<List<ProveedorPapeleraResponseDTO>> listarPapelera() {
+        log.info("📥 [SOLICITUD] Listar proveedores en papelera");
+
+        List<ProveedorPapeleraResponseDTO> papelera = proveedorService.listarPapelera();
+
+        if (papelera.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores en papelera", papelera.size());
+
+        return ResponseEntity.ok(papelera);
+    }
+
+    // ─── Restaurar desde papelera ─────────────────────────────────────────────
+    @PutMapping("/restore")
+    public ResponseEntity<ProveedorResponseDTO> restaurarProveedor(@RequestParam("codigoSucursal") String codigoSucursal) {
+        log.info("📥 [SOLICITUD] Restaurar proveedor con codigo: {}", codigoSucursal);
+
+        ProveedorResponseDTO response = proveedorService.restaurarProveedor(codigoSucursal);
+
+        log.info("📤 [RESPUESTA] Proveedor restaurado: {}", codigoSucursal);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ─── Eliminar definitivamente ─────────────────────────────────────────────
+    @DeleteMapping("/permanent-delete")
+    public ResponseEntity<Void> eliminarDefinitivo(@RequestParam("codigoSucursal") String codigoSucursal) {
+        log.info("📥 [SOLICITUD] Eliminar definitivamente proveedor con codigo: {}", codigoSucursal);
+
+        proveedorService.eliminarDefinitivo(codigoSucursal);
+
+        log.info("📤 [RESPUESTA] Proveedor {} eliminado definitivamente", codigoSucursal);
 
         return ResponseEntity.ok().build();
     }

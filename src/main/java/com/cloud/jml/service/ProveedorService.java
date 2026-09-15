@@ -1,5 +1,6 @@
 package com.cloud.jml.service;
 
+import com.cloud.jml.dto.ProveedorPapeleraResponseDTO;
 import com.cloud.jml.dto.ProveedorRequestDTO;
 import com.cloud.jml.dto.ProveedorResponseDTO;
 import com.cloud.jml.exception.proveedor.ProveedorDuplicadoException;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -32,221 +32,233 @@ public class ProveedorService {
         log.info("🔥 ProveedorService inicializado correctamente.");
     }
 
+    // ─── Listar activos ───────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<ProveedorResponseDTO> listarProveedores() {
-        log.info("🔍 [CONSULTA] Recuperando todos los proveedores desde la base de datos");
+        log.info("🔍 [CONSULTA] Recuperando todos los proveedores activos");
 
-        List<ProveedorEntity> proveedoresEntity = proveedorRepository.findAll();
+        List<ProveedorEntity> entidades = proveedorRepository.findAllByEliminadoFalse();
 
-        if (proveedoresEntity.isEmpty()) {
-            log.warn("⚠️ [RESULTADO] No se encontraron Proveedores registrados en la base de datos");
+        if (entidades.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No se encontraron proveedores activos");
             return List.of();
         }
 
-        log.info("📦 [MAPEO] Transformando {} entidades de proveedores a DTOs", proveedoresEntity.size());
+        List<ProveedorResponseDTO> respuesta = entidades.stream()
+                .map(mapper::mapEntityToResponseDto)
+                .toList();
 
-        // convertir a stream
-        Stream<ProveedorEntity> streamProveedores = proveedoresEntity.stream();
+        log.info("✅ [FINALIZADO] Total de proveedores activos retornados: {}", respuesta.size());
 
-        // mapear entidades a DTOs
-        Stream<ProveedorResponseDTO> streamDto = streamProveedores.map(mapper::mapEntityToResponseDto);
-
-        // recolectar en lista
-        List<ProveedorResponseDTO> proveedoresResponse = streamDto.toList();
-
-        log.info("✅ [FINALIZADO] Total de proveedores mapeados y retornados: {}", proveedoresResponse.size());
-
-        return proveedoresResponse;
+        return respuesta;
     }
 
+    // ─── Crear ────────────────────────────────────────────────────────────────
     @Transactional
     public ProveedorResponseDTO crearProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Inicio de creacion de proveedor: {}", proveedorRequestDTO.getNombre());
+        log.info("🔍 [SOLICITUD] Creando proveedor: {}", proveedorRequestDTO.getNombre());
 
-        Optional<ProveedorEntity> proveedorExistente = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
-
-        if (proveedorExistente.isPresent()) {
-            log.warn("❌ [ERROR] Proveedor duplicado detectado: {}", proveedorRequestDTO.getCodigoSucursal());
+        Optional<ProveedorEntity> existente = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+        if (existente.isPresent() && !existente.get().isEliminado()) {
+            log.warn("❌ [DUPLICADO] Proveedor activo ya existe con codigo: {}", proveedorRequestDTO.getCodigoSucursal());
             throw new ProveedorDuplicadoException(proveedorRequestDTO.getCodigoSucursal());
         }
 
-        log.info("📦 [MAPEO] Transformando DTO a entidad de proveedor");
-        ProveedorEntity proveedorEntity = mapper.mapRequestDtoToEntity(proveedorRequestDTO);
-        log.info("📦 [MAPEO] Proveedor: {} mapeado a entidad con codigo de sucursal: {}", proveedorEntity.getNombre(), proveedorEntity.getCodigoSucursal());
+        ProveedorEntity entidad = mapper.mapRequestDtoToEntity(proveedorRequestDTO);
+        ProveedorEntity guardado = proveedorUtils.guardarProveedorBD(entidad);
 
-        ProveedorEntity guardarProveedor = proveedorUtils.guardarProveedorBD(proveedorEntity);
-        log.info("💾 [PERSISTENCIA] Proveedor: {} guardado exitosamente con codigo de sucursal: {}", guardarProveedor.getNombre(), guardarProveedor.getCodigoSucursal());
+        log.info("💾 [PERSISTENCIA] Proveedor creado: {}", guardado.getCodigoSucursal());
 
-        log.info("📦 [MAPEO] Transformando entidad de proveedor a DTO. (crearProveedor)");
-        ProveedorResponseDTO proveedorResponseDTO = mapper.mapEntityToResponseDto(guardarProveedor);
-        log.info("📦 [MAPEO] Proveedor: {} mapeado a DTO con codigo de sucursal: {}",
-                proveedorResponseDTO.getNombre(), proveedorResponseDTO.getCodigoSucursal());
-
-        log.info("✅ [FINALIZADO] Proveedor creado exitosamente: {} con codigo de sucursal: {}", proveedorResponseDTO.getNombre(), proveedorResponseDTO.getCodigoSucursal());
-
-        return proveedorResponseDTO;
+        return mapper.mapEntityToResponseDto(guardado);
     }
 
+    // ─── Buscar por código sucursal ───────────────────────────────────────────
     @Transactional(readOnly = true)
-    public ProveedorResponseDTO obtenerProveedorPorCodigoSucursal(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedor por codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+    public ProveedorResponseDTO obtenerProveedorPorCodigoSucursal(String codigoSucursal) {
+        log.info("🔍 [CONSULTA] Buscando proveedor con codigo de sucursal: {}", codigoSucursal);
 
-        Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+        ProveedorEntity entidad = proveedorRepository.findByCodigoSucursalAndEliminadoFalse(codigoSucursal)
+                .orElseThrow(() -> {
+                    log.warn("❌ [RESULTADO] Proveedor no encontrado: {}", codigoSucursal);
+                    return new ProveedorNoEncontradoException(codigoSucursal);
+                });
 
-        if (optionalProveedor.isEmpty()) {
-            log.warn("❌ [RESULTADO] Proveedor no encontrado con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
-            return null;
-        }
+        log.info("✅ [FINALIZADO] Proveedor encontrado: {}", codigoSucursal);
 
-        ProveedorEntity proveedorEntity = optionalProveedor.get();
-        log.info("📦 [ENCONTRADO] Proveedor encontrado -> codigo de sucursal: {}, nombre: {}",
-                proveedorEntity.getCodigoSucursal(), proveedorEntity.getNombre());
-
-        log.info("📦 [MAPEO] Transformando entidad de proveedor a DTO. (obtenerProveedorPorCodigoSucursal)");
-        ProveedorResponseDTO proveedorResponseDTO = mapper.mapEntityToResponseDto(proveedorEntity);
-        log.info("📦 [MAPEO] Proveedor mapeado a DTO. codigo de sucursal: {}", proveedorResponseDTO.getCodigoSucursal());
-
-        log.info("✅ [FINALIZADO] Proveedor encontrado y mapeado a DTO. codigo de sucursal: {}", proveedorResponseDTO.getCodigoSucursal());
-
-        return proveedorResponseDTO;
+        return mapper.mapEntityToResponseDto(entidad);
     }
 
+    // ─── Buscar por nombre ────────────────────────────────────────────────────
     @Transactional(readOnly = true)
-    public List<ProveedorResponseDTO> obtenerProveedorPorNombre(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedor por nombre: {}", proveedorRequestDTO.getNombre());
+    public List<ProveedorResponseDTO> obtenerProveedorPorNombre(String nombre) {
+        log.info("🔍 [CONSULTA] Buscando proveedores por nombre: {}", nombre);
 
-        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByNombreContainingIgnoreCase(proveedorRequestDTO.getNombre());
+        List<ProveedorEntity> entidades = proveedorRepository.findByNombreContainingIgnoreCaseAndEliminadoFalse(nombre);
 
-        if (proveedorEntity.isEmpty()) {
-            log.warn("❌ [RESULTADO] No se encontraron proveedores con nombre: {}", proveedorRequestDTO.getNombre());
+        if (entidades.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No se encontraron proveedores con nombre: {}", nombre);
             return List.of();
         }
 
-        log.info("📦 [MAPEO] Transformando {} entidades de proveedores a DTOs. (nombre: {})", proveedorEntity.size(), proveedorRequestDTO.getNombre());
-
-        // convertir a stream
-        Stream<ProveedorEntity> streamProveedores = proveedorEntity.stream();
-
-        // mapear entidades a DTOs
-        Stream<ProveedorResponseDTO> streamDto = streamProveedores.map(mapper::mapEntityToResponseDto);
-
-        // recolectar en lista
-        List<ProveedorResponseDTO> proveedorResponse = streamDto.toList();
-
-        log.info("✅ [FINALIZADO] Proveedores encontrados con nombre: {}. Total encontrados: {}", proveedorRequestDTO.getNombre(), proveedorResponse.size());
-
-        return proveedorResponse;
+        return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<ProveedorResponseDTO> obtenerProveedorPorFechaCreacion(String fechaInicio, String fechaFin) {
-        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedores por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
-
-        LocalDateTime inicio = proveedorUtils.parsearFechaInicio(fechaInicio);
-        LocalDateTime fin = proveedorUtils.parsearFechaFin(fechaFin);
-
-        log.info("📅 [RANGO] Buscando proveedores entre {} y {}", inicio, fin);
-
-        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByFechaCreacionBetween(inicio, fin);
-
-        if (proveedorEntity.isEmpty()) {
-            log.warn("❌ [RESULTADO] No se encontraron proveedores en el rango de fechas: {} - {}", inicio, fin);
-            return List.of();
-        }
-
-        List<ProveedorResponseDTO> proveedorResponse = proveedorEntity.stream()
-                .map(mapper::mapEntityToResponseDto)
-                .toList();
-
-        log.info("✅ [FINALIZADO] Proveedores encontrados en rango de fechas. Total: {}", proveedorResponse.size());
-
-        return proveedorResponse;
-    }
-
+    // ─── Buscar por correo ────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<ProveedorResponseDTO> obtenerProveedorPorCorreo(String correo) {
-        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedores por correo: {}", correo);
+        log.info("🔍 [CONSULTA] Buscando proveedores por correo: {}", correo);
 
-        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByCorreoContainingIgnoreCase(correo);
+        List<ProveedorEntity> entidades = proveedorRepository.findByCorreoContainingIgnoreCaseAndEliminadoFalse(correo);
 
-        if (proveedorEntity.isEmpty()) {
-            log.warn("❌ [RESULTADO] No se encontraron proveedores con correo: {}", correo);
+        if (entidades.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No se encontraron proveedores con correo: {}", correo);
             return List.of();
         }
 
-        List<ProveedorResponseDTO> proveedorResponse = proveedorEntity.stream()
-                .map(mapper::mapEntityToResponseDto)
-                .toList();
-
-        log.info("✅ [FINALIZADO] Proveedores encontrados con correo: {}. Total: {}", correo, proveedorResponse.size());
-
-        return proveedorResponse;
+        return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
+    // ─── Buscar por creadoPor ─────────────────────────────────────────────────
     @Transactional(readOnly = true)
-    public List<ProveedorResponseDTO> obtenerProveedorPorFechaActualizacion(String fechaInicio, String fechaFin) {
-        log.info("🔍 [CONSULTA] Iniciando busqueda de proveedores por fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
+    public List<ProveedorResponseDTO> obtenerProveedorPorCreadoPor(String creadoPor) {
+        log.info("🔍 [CONSULTA] Buscando proveedores por creadoPor: {}", creadoPor);
+
+        List<ProveedorEntity> entidades = proveedorRepository.findByCreadoPorContainingIgnoreCaseAndEliminadoFalse(creadoPor);
+
+        if (entidades.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No se encontraron proveedores creados por: {}", creadoPor);
+            return List.of();
+        }
+
+        return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
+    }
+
+    // ─── Buscar por fecha de creación ─────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<ProveedorResponseDTO> obtenerProveedorPorFechaCreacion(String fechaInicio, String fechaFin) {
+        log.info("🔍 [CONSULTA] Buscando proveedores por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
 
         LocalDateTime inicio = proveedorUtils.parsearFechaInicio(fechaInicio);
         LocalDateTime fin = proveedorUtils.parsearFechaFin(fechaFin);
 
-        List<ProveedorEntity> proveedorEntity = proveedorRepository.findByFechaActualizacionBetween(inicio, fin);
+        List<ProveedorEntity> entidades = proveedorRepository.findByFechaCreacionBetweenAndEliminadoFalse(inicio, fin);
 
-        if (proveedorEntity.isEmpty()) {
-            log.warn("❌ [RESULTADO] No se encontraron proveedores en el rango de fecha de actualizacion.");
+        if (entidades.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No se encontraron proveedores en el rango de fechas: {} - {}", inicio, fin);
             return List.of();
         }
 
-        List<ProveedorResponseDTO> proveedorResponse = proveedorEntity.stream()
-                .map(mapper::mapEntityToResponseDto)
-                .toList();
-
-        log.info("✅ [FINALIZADO] Proveedores encontrados por fecha de actualizacion. Total: {}", proveedorResponse.size());
-
-        return proveedorResponse;
+        return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
+    // ─── Buscar por fecha de actualización ───────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<ProveedorResponseDTO> obtenerProveedorPorFechaActualizacion(String fechaInicio, String fechaFin) {
+        log.info("🔍 [CONSULTA] Buscando proveedores por rango de fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
+
+        LocalDateTime inicio = proveedorUtils.parsearFechaInicio(fechaInicio);
+        LocalDateTime fin = proveedorUtils.parsearFechaFin(fechaFin);
+
+        List<ProveedorEntity> entidades = proveedorRepository.findByFechaActualizacionBetweenAndEliminadoFalse(inicio, fin);
+
+        if (entidades.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No se encontraron proveedores en el rango de fecha de actualizacion.");
+            return List.of();
+        }
+
+        return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
+    }
+
+    // ─── Actualizar ───────────────────────────────────────────────────────────
     @Transactional
     public ProveedorResponseDTO actualizarProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Inicio de actualizacion de proveedor: {} con codigo de sucursal: {}",
-                proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
+        log.info("🔍 [SOLICITUD] Actualizando proveedor con codigo: {}", proveedorRequestDTO.getCodigoSucursal());
 
-        // Paso 1: Validar existencia
-        ProveedorEntity proveedorEntity = proveedorUtils.validarExistenciaProveedor(proveedorRequestDTO);
+        ProveedorEntity entidad = proveedorUtils.validarExistenciaProveedor(proveedorRequestDTO);
+        mapper.actualizarDatosProveedor(proveedorRequestDTO, entidad);
+        ProveedorEntity actualizado = proveedorUtils.guardarProveedorBD(entidad);
 
-        // Paso 2: Actualizar datos
-        mapper.actualizarDatosProveedor(proveedorRequestDTO, proveedorEntity);
+        log.info("✅ [FINALIZADO] Proveedor actualizado: {}", actualizado.getCodigoSucursal());
 
-        // Paso 3: Guardar cambios en la BD
-        ProveedorEntity actualizado = proveedorUtils.guardarProveedorBD(proveedorEntity);
-        log.info("💾 [PERSISTENCIA] Proveedor actualizado: {} con codigo de sucursal: {}", actualizado.getNombre(), actualizado.getCodigoSucursal());
-
-        // Paso 4: Mapear a DTO
-        log.info("📦 [MAPEO] Transformando entidad de proveedor a DTO. (actualizarProveedor)");
-        ProveedorResponseDTO proveedorResponseDTO = mapper.mapEntityToResponseDto(actualizado);
-        log.info("📦 [MAPEO] Proveedor mapeado a DTO. codigo de sucursal: {}, nombre: {}, direccion: {}",
-                proveedorResponseDTO.getCodigoSucursal(), proveedorResponseDTO.getNombre(), proveedorResponseDTO.getDireccion());
-
-        log.info("✅ [FINALIZADO] Actualizacion de proveedor completada: {} con codigo de sucursal: {}", proveedorResponseDTO.getNombre(), proveedorResponseDTO.getCodigoSucursal());
-
-        return proveedorResponseDTO;
+        return mapper.mapEntityToResponseDto(actualizado);
     }
 
+    // ─── Soft delete (a papelera) ─────────────────────────────────────────────
     @Transactional
-    public void eliminarProveedor(ProveedorRequestDTO proveedorRequestDTO) {
-        log.info("🔍 [CONSULTA] Inicio de eliminacion de proveedor con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
+    public void eliminarProveedor(String codigoSucursal, String eliminadoPorId, String eliminadoPorNombre) {
+        log.info("🔍 [SOLICITUD] Enviando a papelera proveedor con codigo: {}", codigoSucursal);
 
-        Optional<ProveedorEntity> proveedorExistente = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+        ProveedorEntity entidad = proveedorRepository.findByCodigoSucursalAndEliminadoFalse(codigoSucursal)
+                .orElseThrow(() -> new ProveedorNoEncontradoException(codigoSucursal));
 
-        if (proveedorExistente.isPresent()) {
-            ProveedorEntity proveedorEntity = proveedorExistente.get();
-            log.info("📦 [ENCONTRADO] Proveedor encontrado: {} con codigo de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
+        entidad.setEliminado(true);
+        entidad.setFechaEliminacion(LocalDateTime.now());
+        entidad.setEliminadoPorId(eliminadoPorId);
+        entidad.setEliminadoPorNombre(eliminadoPorNombre);
 
-            proveedorUtils.eliminarProveedorBD(proveedorEntity);
-            log.info("🗑️ [ELIMINADO] Proveedor eliminado correctamente -> {} con codigo de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
-        } else {
-            log.warn("❌ [NO ENCONTRADO] Proveedor no encontrado con codigo de sucursal: {}", proveedorRequestDTO.getCodigoSucursal());
-            throw new ProveedorNoEncontradoException(proveedorRequestDTO.getCodigoSucursal());
+        proveedorUtils.guardarProveedorBD(entidad);
+
+        log.info("🗑️ [PAPELERA] Proveedor {} enviado a papelera por: {}", codigoSucursal, eliminadoPorNombre);
+    }
+
+    // ─── Listar papelera ──────────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<ProveedorPapeleraResponseDTO> listarPapelera() {
+        log.info("🔍 [CONSULTA] Listando proveedores en papelera");
+
+        List<ProveedorEntity> entidades = proveedorRepository.findAllByEliminadoTrue();
+
+        if (entidades.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No hay proveedores en papelera");
+            return List.of();
         }
+
+        List<ProveedorPapeleraResponseDTO> respuesta = entidades.stream()
+                .map(mapper::mapEntityToPapeleraDto)
+                .toList();
+
+        log.info("✅ [FINALIZADO] Total de proveedores en papelera: {}", respuesta.size());
+
+        return respuesta;
+    }
+
+    // ─── Restaurar desde papelera ─────────────────────────────────────────────
+    @Transactional
+    public ProveedorResponseDTO restaurarProveedor(String codigoSucursal) {
+        log.info("🔍 [SOLICITUD] Restaurando proveedor con codigo: {}", codigoSucursal);
+
+        ProveedorEntity entidad = proveedorRepository.findByCodigoSucursalAndEliminadoTrue(codigoSucursal)
+                .orElseThrow(() -> {
+                    log.warn("❌ [RESULTADO] Proveedor no encontrado en papelera: {}", codigoSucursal);
+                    return new ProveedorNoEncontradoException(codigoSucursal);
+                });
+
+        entidad.setEliminado(false);
+        entidad.setFechaEliminacion(null);
+        entidad.setEliminadoPorId(null);
+        entidad.setEliminadoPorNombre(null);
+        entidad.setFechaActualizacion(LocalDateTime.now());
+
+        ProveedorEntity restaurado = proveedorUtils.guardarProveedorBD(entidad);
+
+        log.info("✅ [FINALIZADO] Proveedor restaurado: {}", restaurado.getCodigoSucursal());
+
+        return mapper.mapEntityToResponseDto(restaurado);
+    }
+
+    // ─── Eliminar definitivamente ─────────────────────────────────────────────
+    @Transactional
+    public void eliminarDefinitivo(String codigoSucursal) {
+        log.info("🔍 [SOLICITUD] Eliminando definitivamente proveedor con codigo: {}", codigoSucursal);
+
+        ProveedorEntity entidad = proveedorRepository.findByCodigoSucursalAndEliminadoTrue(codigoSucursal)
+                .orElseThrow(() -> {
+                    log.warn("❌ [RESULTADO] Proveedor no encontrado en papelera: {}", codigoSucursal);
+                    return new ProveedorNoEncontradoException(codigoSucursal);
+                });
+
+        proveedorUtils.eliminarProveedorBD(entidad);
+
+        log.info("🗑️ [ELIMINADO] Proveedor eliminado definitivamente: {}", codigoSucursal);
     }
 }

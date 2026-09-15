@@ -1,5 +1,6 @@
 package com.cloud.jml.utils.proveedor;
 
+import com.cloud.jml.dto.ProveedorPapeleraResponseDTO;
 import com.cloud.jml.dto.ProveedorRequestDTO;
 import com.cloud.jml.dto.ProveedorResponseDTO;
 import com.cloud.jml.model.ProveedorEntity;
@@ -31,6 +32,7 @@ public class ProveedorMapper {
         proveedorEntity.setCorreo(proveedorRequestDTO.getCorreo());
         proveedorEntity.setCreadoPor(proveedorRequestDTO.getCreadoPor());
         proveedorEntity.setFechaCreacion(LocalDateTime.now());
+        proveedorEntity.setEliminado(false);
 
         log.info("✅ [MAPEO] Mapeo completado DTO → Entity para proveedor");
 
@@ -55,6 +57,27 @@ public class ProveedorMapper {
         log.info("✅ [MAPEO] Mapeo completado Entity → DTO para Proveedor");
 
         return proveedorResponseDTO;
+    }
+
+    public ProveedorPapeleraResponseDTO mapEntityToPapeleraDto(ProveedorEntity proveedorEntity) {
+        log.info("📦 [MAPEO] Iniciando mapeo Entity → PapeleraDTO para proveedor: {}", proveedorEntity.getCodigoSucursal());
+
+        ProveedorPapeleraResponseDTO dto = new ProveedorPapeleraResponseDTO();
+
+        dto.setCodigoSucursal(proveedorEntity.getCodigoSucursal());
+        dto.setNombre(proveedorEntity.getNombre());
+        dto.setTelefono(proveedorEntity.getTelefono());
+        dto.setDireccion(proveedorEntity.getDireccion());
+        dto.setCorreo(proveedorEntity.getCorreo());
+        dto.setCreadoPor(proveedorEntity.getCreadoPor());
+        dto.setFechaCreacion(proveedorFormatearFecha.formatearFecha(proveedorEntity.getFechaCreacion()));
+        dto.setFechaEliminacion(proveedorFormatearFecha.formatearFecha(proveedorEntity.getFechaEliminacion()));
+        dto.setEliminadoPorId(proveedorEntity.getEliminadoPorId());
+        dto.setEliminadoPorNombre(proveedorEntity.getEliminadoPorNombre());
+
+        log.info("✅ [MAPEO] Mapeo papelera completado para proveedor: {}", dto.getCodigoSucursal());
+
+        return dto;
     }
 
     public void actualizarDatosProveedor(ProveedorRequestDTO proveedorRequestDTO, ProveedorEntity proveedorEntity) {

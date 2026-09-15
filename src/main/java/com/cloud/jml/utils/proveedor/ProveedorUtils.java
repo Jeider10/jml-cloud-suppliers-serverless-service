@@ -30,7 +30,7 @@ public class ProveedorUtils {
 
     public ProveedorEntity validarExistenciaProveedor(ProveedorRequestDTO proveedorRequestDTO) {
         log.info("🔍 [SOLICITUD] Validando existencia de proveedor: {} con codigo de sucursal: {}", proveedorRequestDTO.getNombre(), proveedorRequestDTO.getCodigoSucursal());
-        Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursal(proveedorRequestDTO.getCodigoSucursal());
+        Optional<ProveedorEntity> optionalProveedor = proveedorRepository.findByCodigoSucursalAndEliminadoFalse(proveedorRequestDTO.getCodigoSucursal());
 
         if (optionalProveedor.isPresent()) {
             ProveedorEntity proveedorEntity = optionalProveedor.get();
