@@ -72,7 +72,7 @@ public class ProveedorService {
         return mapper.mapEntityToResponseDto(guardado);
     }
 
-    // ─── Buscar por código sucursal ───────────────────────────────────────────
+    // ─── Buscar por codigo sucursal ───────────────────────────────────────────
     @Transactional(readOnly = true)
     public ProveedorResponseDTO obtenerProveedorPorCodigoSucursal(String codigoSucursal) {
         log.info("🔍 [CONSULTA] Buscando proveedor con codigo de sucursal: {}", codigoSucursal);
@@ -133,7 +133,7 @@ public class ProveedorService {
         return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
-    // ─── Buscar por fecha de creación ─────────────────────────────────────────
+    // ─── Buscar por fecha de creacion ─────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<ProveedorResponseDTO> obtenerProveedorPorFechaCreacion(String fechaInicio, String fechaFin) {
         log.info("🔍 [CONSULTA] Buscando proveedores por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
@@ -151,7 +151,7 @@ public class ProveedorService {
         return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
-    // ─── Buscar por fecha de actualización ───────────────────────────────────
+    // ─── Buscar por fecha de actualizacion ───────────────────────────────────
     @Transactional(readOnly = true)
     public List<ProveedorResponseDTO> obtenerProveedorPorFechaActualizacion(String fechaInicio, String fechaFin) {
         log.info("🔍 [CONSULTA] Buscando proveedores por rango de fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
@@ -260,5 +260,34 @@ public class ProveedorService {
         proveedorUtils.eliminarProveedorBD(entidad);
 
         log.info("🗑️ [ELIMINADO] Proveedor eliminado definitivamente: {}", codigoSucursal);
+    }
+
+    // ─── Filtrar papelera por fecha de eliminacion ────────────────────────────
+    @Transactional(readOnly = true)
+    public List<ProveedorPapeleraResponseDTO> listarPapeleraPorFecha(String fechaInicio, String fechaFin) {
+
+        LocalDateTime inicio = proveedorUtils.parsearFechaInicio(fechaInicio);
+        LocalDateTime fin = proveedorUtils.parsearFechaFin(fechaFin);
+
+        List<ProveedorEntity> entidades = proveedorRepository.findByFechaEliminacionBetweenAndEliminadoTrue(inicio, fin);
+
+        if (entidades.isEmpty()) {
+            return List.of();
+        }
+
+        return entidades.stream().map(mapper::mapEntityToPapeleraDto).toList();
+    }
+
+    // ─── Filtrar papelera por quien elimino ───────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<ProveedorPapeleraResponseDTO> listarPapeleraPorEliminadoPor(String eliminadoPorId) {
+
+        List<ProveedorEntity> entidades = proveedorRepository.findByEliminadoPorIdContainingIgnoreCaseAndEliminadoTrue(eliminadoPorId);
+
+        if (entidades.isEmpty()) {
+            return List.of();
+        }
+
+        return entidades.stream().map(mapper::mapEntityToPapeleraDto).toList();
     }
 }

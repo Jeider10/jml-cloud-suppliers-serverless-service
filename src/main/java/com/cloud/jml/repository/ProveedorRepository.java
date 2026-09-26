@@ -29,6 +29,10 @@ public interface ProveedorRepository extends JpaRepository<ProveedorEntity, Stri
 
     Optional<ProveedorEntity> findByCodigoSucursalAndEliminadoTrue(String codigoSucursal);
 
+    List<ProveedorEntity> findByFechaEliminacionBetweenAndEliminadoTrue(LocalDateTime inicio, LocalDateTime fin);
+
+    List<ProveedorEntity> findByEliminadoPorIdContainingIgnoreCaseAndEliminadoTrue(String eliminadoPorId);
+
     // ─── Verificar duplicado ──────────────────────────────────────────────────
     Optional<ProveedorEntity> findByCodigoSucursal(String codigoSucursal);
 }

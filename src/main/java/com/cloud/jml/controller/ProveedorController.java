@@ -53,7 +53,7 @@ public class ProveedorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // ─── Buscar por código sucursal ───────────────────────────────────────────
+    // ─── Buscar por codigo sucursal ───────────────────────────────────────────
     @GetMapping("/codigoSucursal")
     public ResponseEntity<ProveedorResponseDTO> obtenerProveedorPorCodigoSucursal(@RequestParam("codigoSucursal") String codigoSucursal) {
         log.info("📥 [SOLICITUD] Buscar proveedor por codigo de sucursal: {}", codigoSucursal);
@@ -113,7 +113,7 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedores);
     }
 
-    // ─── Buscar por fecha de creación ─────────────────────────────────────────
+    // ─── Buscar por fecha de creacion ─────────────────────────────────────────
     @GetMapping("/fechaCreacion")
     public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorFechaCreacion(
             @RequestParam("fechaInicio") String fechaInicio,
@@ -132,7 +132,7 @@ public class ProveedorController {
         return ResponseEntity.ok(proveedores);
     }
 
-    // ─── Buscar por fecha de actualización ───────────────────────────────────
+    // ─── Buscar por fecha de actualizacion ───────────────────────────────────
     @GetMapping("/fechaActualizacion")
     public ResponseEntity<List<ProveedorResponseDTO>> obtenerProveedorPorFechaActualizacion(
             @RequestParam("fechaInicio") String fechaInicio,
@@ -217,5 +217,34 @@ public class ProveedorController {
         log.info("📤 [RESPUESTA] Proveedor {} eliminado definitivamente", codigoSucursal);
 
         return ResponseEntity.ok().build();
+    }
+
+    // ─── Filtrar papelera por fecha de eliminacion ────────────────────────────
+    @GetMapping("/trash/fecha")
+    public ResponseEntity<List<ProveedorPapeleraResponseDTO>> listarPapeleraPorFecha(
+            @RequestParam("fechaInicio") String fechaInicio,
+            @RequestParam("fechaFin") String fechaFin) {
+
+        List<ProveedorPapeleraResponseDTO> resultado = proveedorService.listarPapeleraPorFecha(fechaInicio, fechaFin);
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(resultado);
+    }
+
+    // ─── Filtrar papelera por quien elimino ───────────────────────────────────
+    @GetMapping("/trash/eliminadoPor")
+    public ResponseEntity<List<ProveedorPapeleraResponseDTO>> listarPapeleraPorEliminadoPor(
+            @RequestParam("eliminadoPorId") String eliminadoPorId) {
+
+        List<ProveedorPapeleraResponseDTO> resultado = proveedorService.listarPapeleraPorEliminadoPor(eliminadoPorId);
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(resultado);
     }
 }
