@@ -50,6 +50,7 @@ public class ProveedorMapper {
         proveedorResponseDTO.setDireccion(proveedorEntity.getDireccion());
         proveedorResponseDTO.setCorreo(proveedorEntity.getCorreo());
         proveedorResponseDTO.setCreadoPor(proveedorEntity.getCreadoPor());
+        proveedorResponseDTO.setActualizadoPor(proveedorEntity.getActualizadoPor());
 
         // 🕓 Formateo de fechas
         proveedorFormatearFecha.asignarFechasFormateadas(proveedorEntity, proveedorResponseDTO);
@@ -89,6 +90,7 @@ public class ProveedorMapper {
         proveedorEntity.setCorreo(proveedorRequestDTO.getCorreo());
         proveedorEntity.setTelefono(proveedorRequestDTO.getTelefono());
         proveedorEntity.setDireccion(proveedorRequestDTO.getDireccion());
+        proveedorEntity.setActualizadoPor(proveedorRequestDTO.getActualizadoPor());
 
         // Actualizamos la fecha de actualizacion
         proveedorEntity.setFechaActualizacion(LocalDateTime.now());

@@ -32,4 +32,7 @@ public class ProveedorRequestDTO {
 
     @Size(max = 150, message = "El campo 'creadoPor' no puede exceder 150 caracteres")
     private String creadoPor;
+
+    @Size(max = 150, message = "El campo 'actualizadoPor' no puede exceder 150 caracteres")
+    private String actualizadoPor;
 }

@@ -17,6 +17,7 @@ public class ProveedorResponseDTO {
     private String direccion;
     private String correo;
     private String creadoPor;
+    private String actualizadoPor;
     private String fechaCreacion;
     private String fechaActualizacion;
 }
