@@ -32,8 +32,8 @@ public class ProveedorController {
         List<ProveedorResponseDTO> proveedores = proveedorService.listarProveedores();
 
         if (proveedores.isEmpty()) {
-            log.warn("📤 [RESPUESTA] No se encontraron proveedores activos");
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay proveedores activos — lista vacia");
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} proveedores", proveedores.size());
@@ -73,7 +73,8 @@ public class ProveedorController {
         List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorNombre(nombre);
 
         if (proveedores.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron proveedores con nombre: {} — lista vacia", nombre);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} proveedores con nombre: {}", proveedores.size(), nombre);
@@ -89,7 +90,8 @@ public class ProveedorController {
         List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorCorreo(correo);
 
         if (proveedores.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron proveedores con correo: {} — lista vacia", correo);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} proveedores con correo: {}", proveedores.size(), correo);
@@ -105,7 +107,8 @@ public class ProveedorController {
         List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorCreadoPor(creadoPor);
 
         if (proveedores.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron proveedores creados por: {} — lista vacia", creadoPor);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} proveedores creados por: {}", proveedores.size(), creadoPor);
@@ -124,7 +127,8 @@ public class ProveedorController {
         List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorFechaCreacion(fechaInicio, fechaFin);
 
         if (proveedores.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron proveedores en el rango {} - {} — lista vacia", fechaInicio, fechaFin);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} proveedores en el rango de fechas", proveedores.size());
@@ -143,7 +147,8 @@ public class ProveedorController {
         List<ProveedorResponseDTO> proveedores = proveedorService.obtenerProveedorPorFechaActualizacion(fechaInicio, fechaFin);
 
         if (proveedores.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron proveedores en el rango {} - {} — lista vacia", fechaInicio, fechaFin);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} proveedores por fecha de actualizacion", proveedores.size());
@@ -187,7 +192,8 @@ public class ProveedorController {
         List<ProveedorPapeleraResponseDTO> papelera = proveedorService.listarPapelera();
 
         if (papelera.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay proveedores en papelera — lista vacia");
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} proveedores en papelera", papelera.size());
@@ -225,11 +231,16 @@ public class ProveedorController {
             @RequestParam("fechaInicio") String fechaInicio,
             @RequestParam("fechaFin") String fechaFin) {
 
+        log.info("📥 [SOLICITUD] Filtrar papelera de proveedores por fecha: {} - {}", fechaInicio, fechaFin);
+
         List<ProveedorPapeleraResponseDTO> resultado = proveedorService.listarPapeleraPorFecha(fechaInicio, fechaFin);
 
         if (resultado.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay proveedores en papelera en el rango {} - {} — lista vacia", fechaInicio, fechaFin);
+            return ResponseEntity.ok(List.of());
         }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores en papelera en el rango de fechas", resultado.size());
 
         return ResponseEntity.ok(resultado);
     }
@@ -239,11 +250,16 @@ public class ProveedorController {
     public ResponseEntity<List<ProveedorPapeleraResponseDTO>> listarPapeleraPorEliminadoPor(
             @RequestParam("eliminadoPorId") String eliminadoPorId) {
 
+        log.info("📥 [SOLICITUD] Filtrar papelera de proveedores por eliminadoPorId: {}", eliminadoPorId);
+
         List<ProveedorPapeleraResponseDTO> resultado = proveedorService.listarPapeleraPorEliminadoPor(eliminadoPorId);
 
         if (resultado.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay proveedores en papelera eliminados por: {} — lista vacia", eliminadoPorId);
+            return ResponseEntity.ok(List.of());
         }
+
+        log.info("📤 [RESPUESTA] Se retornan {} proveedores en papelera eliminados por: {}", resultado.size(), eliminadoPorId);
 
         return ResponseEntity.ok(resultado);
     }
