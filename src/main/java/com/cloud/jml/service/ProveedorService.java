@@ -185,7 +185,7 @@ public class ProveedorService {
 
     // ─── Soft delete (a papelera) ─────────────────────────────────────────────
     @Transactional
-    public void eliminarProveedor(String codigoSucursal, String eliminadoPorId, String eliminadoPorNombre) {
+    public void eliminarProveedor(String codigoSucursal, String eliminadoPorId, String eliminadoPorNombre, String eliminadoPorRol, String motivo) {
         log.info("🔍 [SOLICITUD] Enviando a papelera proveedor con codigo: {}", codigoSucursal);
 
         ProveedorEntity entidad = proveedorRepository.findByCodigoSucursalAndEliminadoFalse(codigoSucursal)
@@ -193,8 +193,11 @@ public class ProveedorService {
 
         entidad.setEliminado(true);
         entidad.setFechaEliminacion(LocalDateTime.now());
+        entidad.setFechaExpiracion(LocalDateTime.now().plusMonths(2));
         entidad.setEliminadoPorId(eliminadoPorId);
         entidad.setEliminadoPorNombre(eliminadoPorNombre);
+        entidad.setEliminadoPorRol(eliminadoPorRol);
+        entidad.setMotivo(motivo != null ? motivo : "Sin motivo especificado");
 
         proveedorUtils.guardarProveedorBD(entidad);
 
@@ -235,8 +238,11 @@ public class ProveedorService {
 
         entidad.setEliminado(false);
         entidad.setFechaEliminacion(null);
+        entidad.setFechaExpiracion(null);
         entidad.setEliminadoPorId(null);
         entidad.setEliminadoPorNombre(null);
+        entidad.setEliminadoPorRol(null);
+        entidad.setMotivo(null);
         entidad.setFechaActualizacion(LocalDateTime.now());
 
         ProveedorEntity restaurado = proveedorUtils.guardarProveedorBD(entidad);

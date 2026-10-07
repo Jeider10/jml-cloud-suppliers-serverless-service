@@ -173,11 +173,13 @@ public class ProveedorController {
     public ResponseEntity<Void> eliminarProveedor(
             @RequestParam("codigoSucursal") String codigoSucursal,
             @RequestParam("eliminadoPorId") String eliminadoPorId,
-            @RequestParam("eliminadoPorNombre") String eliminadoPorNombre) {
+            @RequestParam("eliminadoPorNombre") String eliminadoPorNombre,
+            @RequestParam("eliminadoPorRol") String eliminadoPorRol,
+            @RequestParam(value = "motivo", required = false) String motivo) {
 
         log.info("📥 [SOLICITUD] Enviar a papelera proveedor con codigo: {}", codigoSucursal);
 
-        proveedorService.eliminarProveedor(codigoSucursal, eliminadoPorId, eliminadoPorNombre);
+        proveedorService.eliminarProveedor(codigoSucursal, eliminadoPorId, eliminadoPorNombre, eliminadoPorRol, motivo);
 
         log.info("📤 [RESPUESTA] Proveedor {} enviado a papelera por: {}", codigoSucursal, eliminadoPorNombre);
 
